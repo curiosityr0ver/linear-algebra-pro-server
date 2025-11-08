@@ -510,6 +510,112 @@ export class Matrix {
   }
 
   /**
+   * Get a specific row as an array
+   * @param rowIndex Row index to get
+   * @returns Array of numbers representing the row
+   */
+  getRow(rowIndex: number): number[] {
+    if (rowIndex < 0 || rowIndex >= this._rows) {
+      throw new Error(`Row index out of bounds: ${rowIndex}`);
+    }
+    return [...this._data[rowIndex]];
+  }
+
+  /**
+   * Get a specific column as a Matrix (column vector)
+   * @param colIndex Column index to get
+   * @returns Matrix representing the column
+   */
+  getColumn(colIndex: number): Matrix {
+    if (colIndex < 0 || colIndex >= this._cols) {
+      throw new Error(`Column index out of bounds: ${colIndex}`);
+    }
+
+    const columnData: number[][] = [];
+    for (let i = 0; i < this._rows; i++) {
+      columnData.push([this._data[i][colIndex]]);
+    }
+    return new Matrix(columnData);
+  }
+
+  /**
+   * Element-wise multiplication with another matrix
+   * @param other Matrix to multiply element-wise
+   * @returns New matrix with element-wise product
+   */
+  elementWiseMultiply(other: Matrix): Matrix {
+    if (this.rows !== other.rows || this.cols !== other.cols) {
+      throw new Error(
+        'Matrix dimensions must match for element-wise multiplication',
+      );
+    }
+
+    const result: number[][] = [];
+    for (let i = 0; i < this.rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < this.cols; j++) {
+        row.push(this.get(i, j) * other.get(i, j));
+      }
+      result.push(row);
+    }
+    return new Matrix(result);
+  }
+
+  /**
+   * Element-wise division with another matrix
+   * @param other Matrix to divide element-wise
+   * @returns New matrix with element-wise quotient
+   */
+  elementWiseDivide(other: Matrix): Matrix {
+    if (this.rows !== other.rows || this.cols !== other.cols) {
+      throw new Error('Matrix dimensions must match for element-wise division');
+    }
+
+    const result: number[][] = [];
+    for (let i = 0; i < this.rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < this.cols; j++) {
+        row.push(this.get(i, j) / other.get(i, j));
+      }
+      result.push(row);
+    }
+    return new Matrix(result);
+  }
+
+  /**
+   * Element-wise square root
+   * @returns New matrix with element-wise square root
+   */
+  elementWiseSqrt(): Matrix {
+    const result: number[][] = [];
+    for (let i = 0; i < this.rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < this.cols; j++) {
+        row.push(Math.sqrt(this.get(i, j)));
+      }
+      result.push(row);
+    }
+    return new Matrix(result);
+  }
+
+  /**
+   * Add scalar to all elements
+   * @param scalar Scalar value to add
+   * @returns New matrix with scalar added
+   */
+  addScalar(scalar: number): Matrix {
+    const result: number[][] = [];
+    for (let i = 0; i < this.rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < this.cols; j++) {
+        row.push(this.get(i, j) + scalar);
+      }
+      result.push(row);
+    }
+    return new Matrix(result);
+  }
+
+  /**
    * String representation of the matrix
    */
   toString(): string {

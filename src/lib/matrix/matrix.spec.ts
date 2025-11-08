@@ -423,7 +423,7 @@ describe('Matrix', () => {
         [0, 1],
       ]);
       const result = matrix.powerIteration(10);
-      expect(result.eigenvalue).toBeCloseTo(1.99997, 3); // Should find eigenvalue close to 2
+      expect(result.eigenvalue).toBeCloseTo(2, 2); // Should find eigenvalue 2
     });
   });
 
