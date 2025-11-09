@@ -99,6 +99,18 @@ describe('Matrix', () => {
           }
         }
       });
+
+      it('should throw error for invalid dimensions', () => {
+        expect(() => Matrix.ones(0, 3)).toThrow(
+          'Rows and columns must be positive integers',
+        );
+        expect(() => Matrix.ones(2, 0)).toThrow(
+          'Rows and columns must be positive integers',
+        );
+        expect(() => Matrix.ones(2.5, 3)).toThrow(
+          'Rows and columns must be positive integers',
+        );
+      });
     });
   });
 
@@ -277,6 +289,13 @@ describe('Matrix', () => {
       it('should throw error for division by zero', () => {
         const matrix = new Matrix([[1, 2]]);
         expect(() => matrix.divideScalar(0)).toThrow('Cannot divide by zero');
+      });
+
+      it('should throw error for invalid scalar', () => {
+        const matrix = new Matrix([[1, 2]]);
+        expect(() => matrix.divideScalar(NaN)).toThrow(
+          'Scalar must be a valid number',
+        );
       });
     });
 
