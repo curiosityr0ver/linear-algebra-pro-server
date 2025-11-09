@@ -48,7 +48,7 @@ async function bootstrap() {
     },
   });
 
-  const port = Number(process.env.PORT ?? 3000);
+  const port = Number(process.env.PORT ?? 3001);
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
   console.log(`📚 API Documentation available at http://localhost:${port}/api`);

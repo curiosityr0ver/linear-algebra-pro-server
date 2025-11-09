@@ -59,7 +59,7 @@ Create a `.env` file (or set environment variables) to adjust runtime behaviour.
 
 | Variable         | Default                | Description |
 | ---------------- | ---------------------- | ----------- |
-| `PORT`           | `3000`                 | Port the HTTP server listens on. |
+| `PORT`           | `3001`                 | Port the HTTP server listens on. |
 | `CLIENT_ORIGIN`  | `http://localhost:3000` | Comma-separated list of origins allowed by CORS. |
 
 Example `.env`:
@@ -83,10 +83,36 @@ npm run start:prod
 
 The server logs the effective port and the Swagger UI URL:
 ```
-🚀 Server running on http://localhost:3000
-📚 API Documentation available at http://localhost:3000/api
+🚀 Server running on http://localhost:3001
+📚 API Documentation available at http://localhost:3001/api
 🔐 CORS enabled for: http://localhost:3000
 ```
+
+## Docker Deployment
+Build and run the application in a Docker container for easy deployment.
+
+### Prerequisites
+- Docker installed and running on your system.
+
+### Build the Image
+```bash
+docker build -t linear-algebra-pro-server:v1.0 .
+```
+
+### Run the Container
+```bash
+# Run with default settings
+docker run -p 3000:3000 linear-algebra-pro-server:v1.0
+
+# Or with custom environment variables
+docker run -p 3001:3000 -e PORT=3000 -e CLIENT_ORIGIN=http://localhost:3001 linear-algebra-pro-server:v1.0
+```
+
+The container exposes port 3001. Access the API at `http://localhost:3001` and Swagger UI at `http://localhost:3001/api`.
+
+### Production Deployment
+- Push the image to a registry (e.g., Docker Hub, Google Container Registry).
+- Use in Kubernetes, Docker Compose, or cloud platforms like Google Cloud Run, AWS ECS, etc.
 
 ## Project Structure
 ```
