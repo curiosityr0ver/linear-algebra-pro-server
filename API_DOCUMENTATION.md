@@ -6,11 +6,11 @@ This API provides comprehensive linear algebra operations, advanced mathematical
 
 ## Base URL
 ```
-http://localhost:3000
+http://localhost:3001
 ```
 
 ## API Documentation
-📚 **Interactive API Documentation**: [http://localhost:3000/api](http://localhost:3000/api)
+📚 **Interactive API Documentation**: [http://localhost:3001/api](http://localhost:3001/api)
 
 ## Authentication
 Currently, no authentication is required. All endpoints are publicly accessible.
@@ -28,7 +28,7 @@ POST /matrix/create/identity/{size}
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/matrix/create/identity/3" \
+curl -X POST "http://localhost:3001/matrix/create/identity/3" \
   -H "Content-Type: application/json"
 ```
 
@@ -55,7 +55,7 @@ POST /matrix/create/zeros?rows=2&cols=3
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/matrix/create/zeros?rows=2&cols=3" \
+curl -X POST "http://localhost:3001/matrix/create/zeros?rows=2&cols=3" \
   -H "Content-Type: application/json"
 ```
 
@@ -85,7 +85,7 @@ POST /matrix/add
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/matrix/add" \
+curl -X POST "http://localhost:3001/matrix/add" \
   -H "Content-Type: application/json" \
   -d '{
     "matrixA": {"data": [[1, 2], [3, 4]]},
@@ -144,7 +144,7 @@ POST /matrix/transpose
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/matrix/transpose" \
+curl -X POST "http://localhost:3001/matrix/transpose" \
   -H "Content-Type: application/json" \
   -d '{"matrix": {"data": [[1, 2, 3], [4, 5, 6]]}}'
 ```
@@ -173,7 +173,7 @@ POST /matrix/trace
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/matrix/trace" \
+curl -X POST "http://localhost:3001/matrix/trace" \
   -H "Content-Type: application/json" \
   -d '{"matrix": {"data": [[1, 2], [3, 4]]}}'
 ```
@@ -210,7 +210,7 @@ POST /matrix/info
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/matrix/info" \
+curl -X POST "http://localhost:3001/matrix/info" \
   -H "Content-Type: application/json" \
   -d '{"matrix": {"data": [[1, 2, 3], [4, 5, 6]]}}'
 ```
@@ -265,7 +265,7 @@ POST /advanced/pca/train
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/advanced/pca/train" \
+curl -X POST "http://localhost:3001/advanced/pca/train" \
   -H "Content-Type: application/json" \
   -d '{
     "X": {"data": [[1, 2], [2, 4], [3, 6], [4, 8], [5, 10]]},
@@ -319,7 +319,7 @@ POST /advanced/svd/decompose
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/advanced/svd/decompose" \
+curl -X POST "http://localhost:3001/advanced/svd/decompose" \
   -H "Content-Type: application/json" \
   -d '{"matrix": {"data": [[4, 0, 2], [0, 3, -1], [2, -1, 1]]}}'
 ```
@@ -374,7 +374,7 @@ POST /advanced/qr/decompose
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/advanced/qr/decompose" \
+curl -X POST "http://localhost:3001/advanced/qr/decompose" \
   -H "Content-Type: application/json" \
   -d '{"matrix": {"data": [[1, 1], [1, 0]]}}'
 ```
@@ -439,7 +439,7 @@ POST /ml/linear-regression/train
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/ml/linear-regression/train" \
+curl -X POST "http://localhost:3001/ml/linear-regression/train" \
   -H "Content-Type: application/json" \
   -d '{
     "X": {"data": [[1], [2], [3], [4]]},
@@ -484,7 +484,7 @@ POST /ml/linear-regression/{modelId}/predict
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/ml/linear-regression/linear_regression_1703123456789_abc123def/predict" \
+curl -X POST "http://localhost:3001/ml/linear-regression/linear_regression_1703123456789_abc123def/predict" \
   -H "Content-Type: application/json" \
   -d '{"X": {"data": [[1.5], [2.5]]}}'
 ```
@@ -595,15 +595,15 @@ All matrices are represented as 2D arrays:
 
 ```bash
 # 1. Create training data
-curl -X POST "http://localhost:3000/matrix/create/zeros?rows=10&cols=2"
+curl -X POST "http://localhost:3001/matrix/create/zeros?rows=10&cols=2"
 
 # 2. Perform PCA for dimensionality reduction
-curl -X POST "http://localhost:3000/advanced/pca/train" \
+curl -X POST "http://localhost:3001/advanced/pca/train" \
   -H "Content-Type: application/json" \
   -d '{"X": {"data": [[1,2],[2,4],[3,6],[4,8],[5,10],[1.1,2.1],[2.1,4.1],[3.1,6.1],[4.1,8.1],[5.1,10.1]]}, "nComponents": 1}'
 
 # 3. Train linear regression model
-curl -X POST "http://localhost:3000/ml/linear-regression/train" \
+curl -X POST "http://localhost:3001/ml/linear-regression/train" \
   -H "Content-Type: application/json" \
   -d '{
     "X": {"data": [[1],[2],[3],[4],[5]]},
@@ -612,7 +612,7 @@ curl -X POST "http://localhost:3000/ml/linear-regression/train" \
   }'
 
 # 4. Make predictions
-curl -X POST "http://localhost:3000/ml/linear-regression/{modelId}/predict" \
+curl -X POST "http://localhost:3001/ml/linear-regression/{modelId}/predict" \
   -H "Content-Type: application/json" \
   -d '{"X": {"data": [[6],[7]]}}'
 ```
@@ -645,4 +645,4 @@ npm run test:cov
 
 ---
 
-**For more details, visit the interactive API documentation at `http://localhost:3000/api`**
+**For more details, visit the interactive API documentation at `http://localhost:3001/api`**

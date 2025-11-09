@@ -1,11 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
+  BadRequestException,
   Body,
-  Query,
+  Controller,
   Param,
   ParseIntPipe,
+  Post,
+  Query,
   ValidationPipe
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
@@ -59,7 +59,7 @@ export class MatrixController {
   @ApiResponse({ status: 201, description: 'Matrices added', type: MatrixResultDto })
   addMatrices(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (!operation.matrixB) {
-      throw new Error('Second matrix (matrixB) is required for addition');
+      throw new BadRequestException('Second matrix (matrixB) is required for addition');
     }
     return this.matrixService.addMatrices(operation.matrixA, operation.matrixB);
   }
@@ -69,7 +69,7 @@ export class MatrixController {
   @ApiResponse({ status: 201, description: 'Matrices subtracted', type: MatrixResultDto })
   subtractMatrices(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (!operation.matrixB) {
-      throw new Error('Second matrix (matrixB) is required for subtraction');
+      throw new BadRequestException('Second matrix (matrixB) is required for subtraction');
     }
     return this.matrixService.subtractMatrices(operation.matrixA, operation.matrixB);
   }
@@ -79,7 +79,7 @@ export class MatrixController {
   @ApiResponse({ status: 201, description: 'Matrices multiplied', type: MatrixResultDto })
   multiplyMatrices(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (!operation.matrixB) {
-      throw new Error('Second matrix (matrixB) is required for multiplication');
+      throw new BadRequestException('Second matrix (matrixB) is required for multiplication');
     }
     return this.matrixService.multiplyMatrices(operation.matrixA, operation.matrixB);
   }
@@ -89,7 +89,7 @@ export class MatrixController {
   @ApiResponse({ status: 201, description: 'Matrix multiplied by scalar', type: MatrixResultDto })
   multiplyByScalar(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (operation.scalar === undefined) {
-      throw new Error('Scalar value is required for scalar multiplication');
+      throw new BadRequestException('Scalar value is required for scalar multiplication');
     }
     return this.matrixService.multiplyByScalar(operation.matrixA, operation.scalar);
   }
@@ -99,7 +99,7 @@ export class MatrixController {
   @ApiResponse({ status: 201, description: 'Matrix divided by scalar', type: MatrixResultDto })
   divideByScalar(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (operation.scalar === undefined) {
-      throw new Error('Scalar value is required for scalar division');
+      throw new BadRequestException('Scalar value is required for scalar division');
     }
     return this.matrixService.divideByScalar(operation.matrixA, operation.scalar);
   }
