@@ -13,6 +13,7 @@
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Running Locally](#running-locally)
+- [Deployment](#deployment)
 - [Project Structure](#project-structure)
 - [REST API Overview](#rest-api-overview)
   - [Matrix API](#matrix-api)
@@ -88,31 +89,11 @@ The server logs the effective port and the Swagger UI URL:
 🔐 CORS enabled for: http://localhost:3000
 ```
 
-## Docker Deployment
-Build and run the application in a Docker container for easy deployment.
+## Deployment
+Comprehensive Docker instructions and future deployment targets live in [`DEPLOYMENT.md`](./DEPLOYMENT.md).
 
-### Prerequisites
-- Docker installed and running on your system.
-
-### Build the Image
-```bash
-docker build -t linear-algebra-pro-server:v1.0 .
-```
-
-### Run the Container
-```bash
-# Run with default settings
-docker run -p 3000:3000 linear-algebra-pro-server:v1.0
-
-# Or with custom environment variables
-docker run -p 3001:3000 -e PORT=3000 -e CLIENT_ORIGIN=http://localhost:3001 linear-algebra-pro-server:v1.0
-```
-
-The container exposes port 3001. Access the API at `http://localhost:3001` and Swagger UI at `http://localhost:3001/api`.
-
-### Production Deployment
-- Push the image to a registry (e.g., Docker Hub, Google Container Registry).
-- Use in Kubernetes, Docker Compose, or cloud platforms like Google Cloud Run, AWS ECS, etc.
+- [Docker quickstart and container management](./DEPLOYMENT.md#docker-quickstart)
+- Roadmap sections for Kubernetes, serverless, and CI/CD (coming soon in the same guide).
 
 ## Project Structure
 ```
@@ -132,7 +113,7 @@ src/
 ```
 
 ## REST API Overview
-- **Base URL:** `http://localhost:<PORT>` (default `3000`)
+- **Base URL:** `http://localhost:<PORT>` (default `3001`)
 - **Content Type:** `application/json`
 - **Swagger UI:** `http://localhost:<PORT>/api`
 - **Status Codes:**
@@ -215,152 +196,4 @@ curl -X POST http://localhost:3000/advanced/svd/decompose \
 ### Machine Learning API
 | Method | Path | Description |
 | ------ | ---- | ----------- |
-| `POST` | `/ml/linear-regression/train` | Train a linear regression model with gradient descent. |
-| `POST` | `/ml/linear-regression/:modelId/predict` | Predict using a previously trained model. |
-| `GET`  | `/ml/models` | List IDs and metadata of trained models. |
-| `GET`  | `/ml/models/:modelId` | Retrieve weights, bias, and metadata for a specific model. |
-| `DELETE` | `/ml/models/:modelId` | Delete a trained model from memory. |
-
-**Train a model**
-```bash
-curl -X POST http://localhost:3000/ml/linear-regression/train \
-  -H "Content-Type: application/json" \
-  -d '{
-    "X": { "data": [[1, 1], [2, 2], [3, 3]] },
-    "y": { "data": [[2], [4], [6]] },
-    "options": { "learningRate": 0.05, "maxIterations": 500 },
-    "lossFunction": "mse"
-  }'
-```
-
-```json
-{
-  "modelId": "linear_regression_1731157812345_u8f3p1qhk",
-  "result": {
-    "weights": { "data": [[1.99], [1.99]], "rows": 2, "cols": 1, "shape": [2, 1] },
-    "bias": { "data": [[0.02]], "rows": 1, "cols": 1, "shape": [1, 1] },
-    "loss_history": [12.5, 4.1, 0.3],
-    "converged": true,
-    "iterations": 120,
-    "final_loss": 0.3
-  }
-}
-```
-
-**List trained models**
-```bash
-curl http://localhost:3000/ml/models
-```
-
-```json
-[
-  {
-    "modelId": "linear_regression_1731157812345_u8f3p1qhk",
-    "type": "linear_regression",
-    "created": "2025-11-09T10:36:52.123Z"
-  }
-]
-```
-
-### Error Handling in the API
-- Validation uses NestJS `ValidationPipe` with whitelist and transformation.
-- Numeric operations are wrapped to surface friendly error messages as HTTP 400.
-- Missing models produce HTTP 404 with a descriptive message.
-
-## Payload Schemas
-- **MatrixDto**: `{ data: number[][], rows?: number, cols?: number, shape?: [number, number] }`
-- **MatrixOperationDto**: `{ matrixA: MatrixDto, matrixB?: MatrixDto, scalar?: number }`
-- **LinearRegressionTrainDto**: training data matrices, gradient descent options, loss function enum.
-- **LinearRegressionResultDto**: learned weights/bias as matrices, loss history, convergence metadata.
-- **PCA / SVD / QR DTOs**: located under `src/dto/` with Swagger definitions generated automatically.
-
-Refer to the Swagger UI for the complete schema definitions generated from these DTOs.
-
-## Library Usage (Node Module)
-
-The REST API is backed by reusable classes located under `src/lib`. They can be imported directly for scripted or embedded use.
-
-```typescript
-import { Matrix, PCA, GradientDescent, LinearRegression, MeanSquaredError, SVD, QR } from './lib';
-
-// Core matrix operations
-const A = new Matrix([[1, 2], [3, 4]]);
-const B = new Matrix([[5, 6], [7, 8]]);
-const sum = A.add(B);
-const determinant = A.determinant();
-const { eigenvalue, eigenvector } = A.powerIteration();
-
-// Gradient descent with linear regression
-const model = new LinearRegression(A.cols, 1);
-const optimizer = new GradientDescent(0.01, 1000, 1e-6, 'adam');
-const mse = new MeanSquaredError();
-const { losses, converged } = optimizer.optimize(model, A, new Matrix([[1], [2]]), mse);
-
-// PCA and SVD utilities
-const pca = new PCA();
-const reduced = pca.fitTransform(A, 1);
-const svd = new SVD();
-svd.decompose(A);
-const singularValues = svd.getSingularValues();
-
-// QR for solving linear systems
-const { Q, R } = QR.decompose(A);
-```
-
-## Testing
-```bash
-# Run all unit tests
-npm test
-
-# Watch mode
-npm run test:watch
-
-# Coverage report
-npm run test:cov
-
-# Target a specific suite
-npm test -- --testPathPattern=matrix.spec.ts
-```
-
-## Development
-```bash
-# Lint and format
-npm run lint
-npm run format
-```
-
-Demos for quick experimentation:
-```bash
-npx ts-node src/demo.ts           # Core matrix operations
-npx ts-node src/advanced-demo.ts  # PCA, SVD, QR, gradient descent
-```
-
-## Error Handling
-- Matrix shape mismatches, invalid indices, and non-square operations raise descriptive errors.
-- Scalar operations guard against `NaN` and division by zero.
-- All REST endpoints convert domain errors into HTTP 400/404 responses with helpful messages.
-
-## Performance Considerations
-- Immutable matrix operations prevent accidental shared state.
-- Algorithms favour numerically stable approaches (Householder QR, cofactor expansion safeguards, etc.).
-- Designed for type safety and fast iteration with TypeScript generics and DTO validation.
-
-## Contributing
-1. Fork the repository.
-2. Create a feature branch.
-3. Add tests covering your change.
-4. Run linting and the full test suite.
-5. Open a pull request describing the motivation and behaviour changes.
-
-## License
-Released under the **MIT License**. See `LICENSE` for details.
-
-## References
-- *Linear Algebra and Its Applications* – Gilbert Strang.
-- *Matrix Computations* – Gene H. Golub & Charles F. Van Loan.
-- *Numerical Linear Algebra* – Lloyd N. Trefethen & David Bau III.
-- *Deep Learning* – Ian Goodfellow, Yoshua Bengio, and Aaron Courville.
-
----
-
-Built with ❤️ using TypeScript, NestJS, and a passion for linear algebra.
+| `POST`
