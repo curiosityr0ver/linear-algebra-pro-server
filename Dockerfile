@@ -22,6 +22,9 @@ FROM node:20-alpine AS production
 # Set working directory
 WORKDIR /app
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Copy package files
 COPY package*.json ./
 

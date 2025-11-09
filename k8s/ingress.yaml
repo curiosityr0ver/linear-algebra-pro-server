@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: linear-algebra-pro-server-ingress
+  labels:
+    app: linear-algebra-pro-server
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # For TLS, uncomment and configure:
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  # For TLS, uncomment and add your domain:
+  # tls:
+  # - hosts:
+  #   - your-domain.com
+  #   secretName: linear-algebra-pro-server-tls
+  rules:
+  - host: your-domain.com
+    # For local testing without domain, use:
+    # host: localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: linear-algebra-pro-server
+            port:
+              number: 80
+

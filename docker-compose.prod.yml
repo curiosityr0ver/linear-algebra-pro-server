@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  linear-algebra-pro-server:
+    image: curiosityr0ver/linear-algebra-pro-server:latest
+    container_name: linear-algebra-pro-server
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - CLIENT_ORIGIN=${CLIENT_ORIGIN:-http://localhost:3000}
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - linear-algebra-network
+
+networks:
+  linear-algebra-network:
+    driver: bridge
+

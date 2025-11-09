@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linear-algebra-pro-server
+  labels:
+    app: linear-algebra-pro-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: linear-algebra-pro-server
+  template:
+    metadata:
+      labels:
+        app: linear-algebra-pro-server
+    spec:
+      containers:
+      - name: linear-algebra-pro-server
+        image: curiosityr0ver/linear-algebra-pro-server:latest
+        # Or use other registries:
+        # image: gcr.io/<PROJECT_ID>/linear-algebra-pro-server:latest
+        # image: <account-id>.dkr.ecr.<region>.amazonaws.com/linear-algebra-pro-server:latest
+        ports:
+        - containerPort: 3001
+          name: http
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: linear-algebra-pro-server-config
+              key: PORT
+        - name: CLIENT_ORIGIN
+          valueFrom:
+            configMapKeyRef:
+              name: linear-algebra-pro-server-config
+              key: CLIENT_ORIGIN
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+

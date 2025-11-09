@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  linear-algebra-pro-server:
+    image: curiosityr0ver/linear-algebra-pro-server:latest
+    container_name: linear-algebra-pro-server
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - CLIENT_ORIGIN=http://localhost:3000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - linear-algebra-network
+
+networks:
+  linear-algebra-network:
+    driver: bridge
+

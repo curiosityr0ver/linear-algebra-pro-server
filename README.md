@@ -90,10 +90,13 @@ The server logs the effective port and the Swagger UI URL:
 ```
 
 ## Deployment
-Comprehensive Docker instructions and future deployment targets live in [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+Comprehensive deployment instructions live in [`DEPLOYMENT.md`](./DEPLOYMENT.md).
 
 - [Docker quickstart and container management](./DEPLOYMENT.md#docker-quickstart)
-- Roadmap sections for Kubernetes, serverless, and CI/CD (coming soon in the same guide).
+- [Container registry publishing](./DEPLOYMENT.md#publishing-to-container-registries) (Docker Hub, GCR, ECR)
+- [Docker Compose orchestration](./DEPLOYMENT.md#docker-compose)
+- [Kubernetes deployment](./DEPLOYMENT.md#kubernetes-deployment)
+- [CI/CD automation with GitHub Actions](./DEPLOYMENT.md#cicd-automation)
 
 ## Project Structure
 ```
