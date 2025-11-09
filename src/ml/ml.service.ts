@@ -17,7 +17,7 @@ import {
 
 @Injectable()
 export class MLService {
-  private trainedModels = new Map<string, LinearRegression>();
+  private trainedModels = new Map<string, { model: LinearRegression; createdAt: number }>();
 
   /**
    * Convert 2D array to Matrix
@@ -44,6 +44,14 @@ export class MLService {
       cols: matrix.cols,
       shape: matrix.shape
     };
+  }
+
+  /**
+   * Safely format timestamp as ISO string
+   */
+  private toIsoStringSafe(timestamp: number): string {
+    const date = new Date(timestamp);
+    return Number.isFinite(date.getTime()) ? date.toISOString() : 'Invalid Date';
   }
 
   /**
@@ -96,8 +104,9 @@ export class MLService {
     const trainingResult = optimizer.optimize(model, X, y, lossFn);
 
     // Store trained model
-    const modelId = `linear_regression_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.trainedModels.set(modelId, model);
+    const createdAt = Date.now();
+    const modelId = `linear_regression_${createdAt}_${Math.random().toString(36).substr(2, 9)}`;
+    this.trainedModels.set(modelId, { model, createdAt });
 
     const result: LinearRegressionResultDto = {
       weights: this.matrixToDto(model.getParameters()[0]),
@@ -118,13 +127,13 @@ export class MLService {
     modelId: string,
     predictionData: LinearRegressionPredictDto
   ): Promise<LinearRegressionPredictResultDto> {
-    const model = this.trainedModels.get(modelId);
-    if (!model) {
+    const entry = this.trainedModels.get(modelId);
+    if (!entry) {
       throw new Error(`Model with ID ${modelId} not found`);
     }
 
     const X = this.arrayToMatrix(predictionData.X.data);
-    const predictions = model.predict(X);
+    const predictions = entry.model.predict(X);
 
     return {
       predictions: this.matrixToDto(predictions)
@@ -136,12 +145,11 @@ export class MLService {
    */
   getTrainedModels(): { modelId: string; type: string; created: string }[] {
     const models: { modelId: string; type: string; created: string }[] = [];
-    for (const [modelId, model] of this.trainedModels) {
-      const [, timestamp] = modelId.split('_');
+    for (const [modelId, entry] of this.trainedModels) {
       models.push({
         modelId,
         type: 'linear_regression',
-        created: new Date(parseInt(timestamp)).toISOString()
+        created: this.toIsoStringSafe(entry.createdAt)
       });
     }
     return models;
@@ -165,20 +173,19 @@ export class MLService {
     bias: any;
     created: string;
   } | null {
-    const model = this.trainedModels.get(modelId);
-    if (!model) {
+    const entry = this.trainedModels.get(modelId);
+    if (!entry) {
       return null;
     }
 
-    const [, timestamp] = modelId.split('_');
-    const [weights, bias] = model.getParameters();
+    const [weights, bias] = entry.model.getParameters();
 
     return {
       modelId,
       type: 'linear_regression',
       weights: this.matrixToDto(weights),
       bias: this.matrixToDto(bias),
-      created: new Date(parseInt(timestamp)).toISOString()
+      created: this.toIsoStringSafe(entry.createdAt)
     };
   }
 }

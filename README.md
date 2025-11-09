@@ -5,422 +5,336 @@
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
 
-A comprehensive, high-performance linear algebra library built with TypeScript, featuring core matrix operations and advanced algorithms including PCA, Gradient Descent, SVD, and QR decomposition.
+> A NestJS-powered REST API and numerical computing toolkit that exposes high-performance matrix operations, advanced linear algebra algorithms, and gradient-based machine learning utilities.
 
-## 🚀 Features
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Running Locally](#running-locally)
+- [Project Structure](#project-structure)
+- [REST API Overview](#rest-api-overview)
+  - [Matrix API](#matrix-api)
+  - [Advanced Algorithms API](#advanced-algorithms-api)
+  - [Machine Learning API](#machine-learning-api)
+- [Payload Schemas](#payload-schemas)
+- [Library Usage (Node Module)](#library-usage-node-module)
+- [Testing](#testing)
+- [Development](#development)
+- [Error Handling](#error-handling)
+- [Performance Considerations](#performance-considerations)
+- [Contributing](#contributing)
+- [License](#license)
+- [References](#references)
 
-### Core Matrix Operations
-- ✅ **Matrix Creation**: Constructor, identity, zeros, ones matrices
-- ✅ **Arithmetic Operations**: Addition, subtraction, multiplication, scalar operations
-- ✅ **Advanced Operations**: Transpose, trace, determinant, eigenvalues
-- ✅ **Matrix Utilities**: Element access, cloning, equality checking
+## Features
+- **REST API**
+  - Matrix CRUD operations, arithmetic, and analysis endpoints.
+  - Advanced endpoints for PCA, SVD, and QR decomposition.
+  - Linear regression training, prediction, and model lifecycle management.
+- **Numerical Library**
+  - Immutable matrix implementation with validation and rich utility methods.
+  - Optimization toolkit with SGD, Momentum, and Adam gradient descent.
+  - Principal component analysis, singular value decomposition, and QR factorisation.
+- **Tooling & Quality**
+  - NestJS with global validation, Swagger/OpenAPI docs, and configurable CORS.
+  - Comprehensive Jest unit tests across matrix, advanced, and ML components.
+  - ESLint + Prettier configuration for consistent TypeScript code style.
 
-### Advanced Algorithms
-- ✅ **Principal Component Analysis (PCA)**: Dimensionality reduction with explained variance
-- ✅ **Gradient Descent**: SGD, Momentum, and Adam optimization algorithms
-- ✅ **Singular Value Decomposition (SVD)**: Matrix decomposition with low-rank approximation
-- ✅ **QR Decomposition**: Householder transformations for linear systems
+## Prerequisites
+- Node.js **20.x** (NestJS 11 requires Node 18+, 20.x recommended).
+- npm **10.x** or newer.
+- (Optional) `ts-node` for running demos from the command line.
 
-### Quality Assurance
-- ✅ **63 Comprehensive Tests** covering all functionality
-- ✅ **Type-Safe TypeScript** implementation
-- ✅ **Full Documentation** with mathematical background
-- ✅ **Production Ready** with error handling and validation
-
-## 📦 Installation
-
+## Installation
 ```bash
+git clone https://github.com/<your-org>/linear-algebra-pro-server.git
+cd linear-algebra-pro-server
 npm install
 ```
 
-## 🏗️ Project Structure
+## Configuration
+Create a `.env` file (or set environment variables) to adjust runtime behaviour.
 
-```
-src/
-├── lib/
-│   ├── matrix/           # Core matrix operations
-│   │   ├── matrix.ts     # Matrix class with all operations
-│   │   └── matrix.spec.ts # Unit tests
-│   └── advanced/         # Advanced algorithms
-│       ├── pca.ts        # Principal Component Analysis
-│       ├── gradient-descent.ts # Optimization framework
-│       ├── svd.ts        # Singular Value Decomposition
-│       ├── qr.ts         # QR Decomposition
-│       └── advanced.spec.ts # Algorithm tests
-├── demo.ts               # Basic matrix operations demo
-├── advanced-demo.ts      # Advanced algorithms demo
-└── main.ts               # NestJS server entry point
+| Variable         | Default                | Description |
+| ---------------- | ---------------------- | ----------- |
+| `PORT`           | `3000`                 | Port the HTTP server listens on. |
+| `CLIENT_ORIGIN`  | `http://localhost:3000` | Comma-separated list of origins allowed by CORS. |
+
+Example `.env`:
+```dotenv
+PORT=3001
+CLIENT_ORIGIN=http://localhost:3000,http://localhost:5173
 ```
 
-## 🎯 Quick Start
-
-### Basic Matrix Operations
-
-```typescript
-import { Matrix } from './lib';
-
-// Create matrices
-const A = new Matrix([[1, 2], [3, 4]]);
-const B = new Matrix([[5, 6], [7, 8]]);
-const I = Matrix.identity(3);
-
-// Arithmetic operations
-const sum = A.add(B);
-const product = A.multiply(B);
-const transpose = A.transpose();
-
-// Scalar operations
-const scaled = A.multiplyScalar(2);
-const trace = A.trace();
-const det = A.determinant();
-
-// Eigenvalue computation
-const { eigenvalue, eigenvector } = A.powerIteration();
-```
-
-### Advanced Algorithms
-
-```typescript
-import { PCA, GradientDescent, LinearRegression, MeanSquaredError, SVD, QR } from './lib';
-
-// Principal Component Analysis
-const pca = new PCA();
-const X_pca = pca.fitTransform(X, 2); // Reduce to 2 dimensions
-const explainedVariance = pca.getExplainedVarianceRatio();
-
-// Gradient Descent Optimization
-const model = new LinearRegression(inputDim, outputDim);
-const optimizer = new GradientDescent(0.01, 1000, 1e-6, 'adam');
-const lossFn = new MeanSquaredError();
-
-const result = optimizer.optimize(model, X_train, y_train, lossFn);
-
-// Singular Value Decomposition
-const svd = new SVD();
-svd.decompose(matrix);
-const singularValues = svd.getSingularValues();
-const lowRankApprox = svd.reconstruct(5); // Rank-5 approximation
-
-// QR Decomposition
-const { Q, R } = QR.decompose(matrix);
-const solution = QR.solve(A, b); // Solve A*x = b
-```
-
-## 📚 API Documentation
-
-### Matrix Class
-
-#### Constructor & Static Methods
-
-```typescript
-// Constructor
-const matrix = new Matrix([[1, 2, 3], [4, 5, 6]]);
-
-// Static factory methods
-const identity = Matrix.identity(3);      // 3x3 identity matrix
-const zeros = Matrix.zeros(2, 3);         // 2x3 zero matrix
-const ones = Matrix.ones(2, 2);          // 2x2 ones matrix
-```
-
-#### Properties
-
-```typescript
-const matrix = new Matrix([[1, 2, 3], [4, 5, 6]]);
-
-matrix.rows;        // number: 2
-matrix.cols;        // number: 3
-matrix.shape;       // [number, number]: [2, 3]
-matrix.isSquare;    // boolean: false
-```
-
-#### Element Access
-
-```typescript
-// Get/set individual elements
-const value = matrix.get(0, 1);        // Get element at [0,1]
-matrix.set(0, 1, 10);                  // Set element at [0,1] to 10
-
-// Get rows/columns
-const row = matrix.getRow(0);           // number[]
-const col = matrix.getColumn(1);        // Matrix (column vector)
-```
-
-#### Arithmetic Operations
-
-```typescript
-const A = new Matrix([[1, 2], [3, 4]]);
-const B = new Matrix([[5, 6], [7, 8]]);
-
-// Matrix operations
-const sum = A.add(B);
-const diff = A.subtract(B);
-const product = A.multiply(B);
-
-// Scalar operations
-const scaled = A.multiplyScalar(2);
-const divided = A.divideScalar(3);
-```
-
-#### Advanced Operations
-
-```typescript
-const A = new Matrix([[1, 2], [3, 4]]);
-
-// Matrix properties
-const transposed = A.transpose();
-const trace = A.trace();                    // Sum of diagonal elements
-const det = A.determinant();
-
-// Eigenvalue computation
-const { eigenvalue, eigenvector } = A.powerIteration();
-
-// Utility methods
-const cloned = A.clone();
-const isEqual = A.equals(B, 1e-10);       // With tolerance
-const stringRep = A.toString();
-```
-
-### Principal Component Analysis (PCA)
-
-```typescript
-import { PCA } from './lib';
-
-const pca = new PCA();
-
-// Fit on training data
-pca.fit(X_train, nComponents);
-
-// Transform data
-const X_transformed = pca.transform(X_test);
-
-// Fit and transform in one step
-const X_reduced = pca.fitTransform(X, 2);
-
-// Get results
-const components = pca.getComponents();
-const explainedVariance = pca.getExplainedVariance();
-const explainedVarianceRatio = pca.getExplainedVarianceRatio();
-```
-
-**Mathematical Background:**
-PCA finds principal components by computing the eigenvectors of the covariance matrix. The data is centered, and the covariance matrix is decomposed to find directions of maximum variance.
-
-### Gradient Descent Framework
-
-```typescript
-import { GradientDescent, LinearRegression, MeanSquaredError, BinaryCrossEntropy } from './lib';
-
-// Create model and optimizer
-const model = new LinearRegression(inputDim, outputDim);
-const optimizer = new GradientDescent(
-  learningRate,    // 0.01
-  maxIterations,   // 1000
-  tolerance,       // 1e-6
-  method,          // 'sgd' | 'momentum' | 'adam'
-  options          // Optional: momentumBeta, adamBeta1, adamBeta2
-);
-
-// Loss functions
-const mse = new MeanSquaredError();
-const bce = new BinaryCrossEntropy();
-
-// Optimize
-const result = optimizer.optimize(model, X, y, lossFn);
-
-console.log(`Converged: ${result.converged}`);
-console.log(`Final loss: ${result.losses[result.losses.length - 1]}`);
-console.log(`Iterations: ${result.iterations}`);
-```
-
-**Optimization Methods:**
-- **SGD**: Standard gradient descent with fixed learning rate
-- **Momentum**: Adds momentum term to accelerate convergence
-- **Adam**: Adaptive moment estimation for robust optimization
-
-### Singular Value Decomposition (SVD)
-
-```typescript
-import { SVD } from './lib';
-
-const svd = new SVD();
-
-// Decompose matrix A = U * Σ * V^T
-svd.decompose(A);
-
-// Get components
-const U = svd.getU();
-const Sigma = svd.getSigma();
-const VT = svd.getVT();
-const V = svd.getV();
-
-// Analysis
-const singularValues = svd.getSingularValues();
-const conditionNumber = svd.conditionNumber();
-const rank = svd.numericalRank();
-
-// Low-rank approximation
-const approximation = svd.reconstruct(k); // Keep top k singular values
-```
-
-**Mathematical Background:**
-SVD decomposes a matrix A into U Σ V^T where U and V are orthogonal matrices, and Σ is diagonal with singular values. Used for low-rank approximation, condition number analysis, and pseudo-inverse computation.
-
-### QR Decomposition
-
-```typescript
-import { QR } from './lib';
-
-// Decompose matrix A = Q * R
-const qr = new QR();
-qr.decompose(A);
-
-const Q = qr.getQ();    // Orthogonal matrix
-const R = qr.getR();    // Upper triangular matrix
-
-// Static methods
-const { Q, R } = QR.decompose(A);
-const solution = QR.solve(A, b);  // Solve A*x = b
-
-// Analysis
-const det = qr.determinant();
-const rank = qr.rank();
-```
-
-**Mathematical Background:**
-QR decomposition factors a matrix into an orthogonal matrix Q and an upper triangular matrix R. Uses Householder transformations for numerical stability. Essential for solving linear systems and least squares problems.
-
-## 🧪 Testing
-
+## Running Locally
 ```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run specific test suites
-npm test -- --testPathPattern=matrix.spec.ts
-npm test -- --testPathPattern=advanced.spec.ts
-
-# Run with coverage
-npm run test:cov
-
-# Run e2e tests
-npm run test:e2e
-```
-
-## 🎮 Demos
-
-### Basic Matrix Operations Demo
-```bash
-npx ts-node src/demo.ts
-```
-
-### Advanced Algorithms Demo
-```bash
-npx ts-node src/advanced-demo.ts
-```
-
-The advanced demo showcases:
-- PCA for dimensionality reduction
-- Gradient descent optimization
-- SVD matrix decomposition
-- QR linear system solving
-
-## 🔧 Development
-
-```bash
-# Install dependencies
-npm install
-
-# Development mode with hot reload
+# Start in watch mode with hot reload
 npm run start:dev
 
-# Build for production
+# Start once (useful for production preview)
+npm run start
+
+# Build and run compiled output
 npm run build
+npm run start:prod
+```
 
-# Lint code
+The server logs the effective port and the Swagger UI URL:
+```
+🚀 Server running on http://localhost:3000
+📚 API Documentation available at http://localhost:3000/api
+🔐 CORS enabled for: http://localhost:3000
+```
+
+## Project Structure
+```
+src/
+├── advanced/
+│   ├── advanced.controller.ts   # REST endpoints for PCA, SVD, QR
+│   ├── advanced.module.ts
+│   └── advanced.service.ts
+├── dto/                         # Shared API contracts (MatrixDto, PCA DTOs, etc.)
+├── lib/
+│   ├── matrix/                  # Core matrix implementation and tests
+│   └── advanced/                # PCA, gradient descent, SVD, QR implementations
+├── matrix/                      # Matrix REST module
+├── ml/                          # Machine learning REST module
+├── main.ts                      # Application bootstrap, Swagger, CORS
+└── app.module.ts                # Root module
+```
+
+## REST API Overview
+- **Base URL:** `http://localhost:<PORT>` (default `3000`)
+- **Content Type:** `application/json`
+- **Swagger UI:** `http://localhost:<PORT>/api`
+- **Status Codes:**
+  - `200/201` for successful operations.
+  - `400` for validation errors, incompatible shapes, or invalid parameters.
+  - `404` when a requested trained model cannot be found.
+
+### Matrix API
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| `POST` | `/matrix/create/identity/:size` | Create an `size × size` identity matrix. |
+| `POST` | `/matrix/create/zeros?rows&cols` | Create a zero matrix with the provided shape. |
+| `POST` | `/matrix/create/ones?rows&cols` | Create a matrix filled with ones. |
+| `POST` | `/matrix/add` | Element-wise addition of two equally shaped matrices. |
+| `POST` | `/matrix/subtract` | Element-wise subtraction of two equally shaped matrices. |
+| `POST` | `/matrix/multiply` | Matrix multiplication (`A · B`). |
+| `POST` | `/matrix/multiply-scalar` | Multiply a matrix by a scalar. |
+| `POST` | `/matrix/divide-scalar` | Divide a matrix by a non-zero scalar. |
+| `POST` | `/matrix/transpose` | Transpose a matrix. |
+| `POST` | `/matrix/trace` | Compute the trace of a square matrix. |
+| `POST` | `/matrix/determinant` | Compute the determinant of a square matrix. |
+| `POST` | `/matrix/eigenvalues` | Estimate dominant eigenvalue/eigenvector (power iteration). |
+| `POST` | `/matrix/info` | Retrieve metadata (rows, columns, shape, etc.). |
+| `POST` | `/matrix/clone` | Deep-copy a matrix. |
+| `POST` | `/matrix/equals?tolerance=<number>` | Compare two matrices within a tolerance. |
+
+**Sample: Add two matrices**
+```bash
+curl -X POST http://localhost:3000/matrix/add \
+  -H "Content-Type: application/json" \
+  -d '{
+    "matrixA": { "data": [[1,2],[3,4]] },
+    "matrixB": { "data": [[5,6],[7,8]] }
+  }'
+```
+
+```json
+{
+  "result": {
+    "data": [[6, 8], [10, 12]],
+    "rows": 2,
+    "cols": 2,
+    "shape": [2, 2]
+  },
+  "metadata": {
+    "operation": "add",
+    "shape": [2, 2]
+  }
+}
+```
+
+**Common 400 error**
+```json
+{
+  "statusCode": 400,
+  "message": "Cannot add matrices: shapes [2, 3] and [4, 2] are incompatible",
+  "error": "Bad Request"
+}
+```
+
+### Advanced Algorithms API
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| `POST` | `/advanced/pca/train` | Fit PCA, returning components, explained variance, and transformed data. |
+| `POST` | `/advanced/pca/transform` | Transform a new dataset using previously computed PCA results. |
+| `POST` | `/advanced/svd/decompose` | Perform SVD, returning `U`, `Σ`, `V`, and diagnostics. |
+| `POST` | `/advanced/svd/reconstruct` | Compute a low-rank reconstruction from SVD components. |
+| `POST` | `/advanced/qr/decompose` | Perform QR decomposition, returning `Q` and `R`. |
+| `POST` | `/advanced/qr/solve` | Solve `A·x = b` via QR factorisation. |
+
+**Sample: SVD decomposition**
+```bash
+curl -X POST http://localhost:3000/advanced/svd/decompose \
+  -H "Content-Type: application/json" \
+  -d '{
+    "matrix": { "data": [[3, 1], [1, 3]] }
+  }'
+```
+
+### Machine Learning API
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| `POST` | `/ml/linear-regression/train` | Train a linear regression model with gradient descent. |
+| `POST` | `/ml/linear-regression/:modelId/predict` | Predict using a previously trained model. |
+| `GET`  | `/ml/models` | List IDs and metadata of trained models. |
+| `GET`  | `/ml/models/:modelId` | Retrieve weights, bias, and metadata for a specific model. |
+| `DELETE` | `/ml/models/:modelId` | Delete a trained model from memory. |
+
+**Train a model**
+```bash
+curl -X POST http://localhost:3000/ml/linear-regression/train \
+  -H "Content-Type: application/json" \
+  -d '{
+    "X": { "data": [[1, 1], [2, 2], [3, 3]] },
+    "y": { "data": [[2], [4], [6]] },
+    "options": { "learningRate": 0.05, "maxIterations": 500 },
+    "lossFunction": "mse"
+  }'
+```
+
+```json
+{
+  "modelId": "linear_regression_1731157812345_u8f3p1qhk",
+  "result": {
+    "weights": { "data": [[1.99], [1.99]], "rows": 2, "cols": 1, "shape": [2, 1] },
+    "bias": { "data": [[0.02]], "rows": 1, "cols": 1, "shape": [1, 1] },
+    "loss_history": [12.5, 4.1, 0.3],
+    "converged": true,
+    "iterations": 120,
+    "final_loss": 0.3
+  }
+}
+```
+
+**List trained models**
+```bash
+curl http://localhost:3000/ml/models
+```
+
+```json
+[
+  {
+    "modelId": "linear_regression_1731157812345_u8f3p1qhk",
+    "type": "linear_regression",
+    "created": "2025-11-09T10:36:52.123Z"
+  }
+]
+```
+
+### Error Handling in the API
+- Validation uses NestJS `ValidationPipe` with whitelist and transformation.
+- Numeric operations are wrapped to surface friendly error messages as HTTP 400.
+- Missing models produce HTTP 404 with a descriptive message.
+
+## Payload Schemas
+- **MatrixDto**: `{ data: number[][], rows?: number, cols?: number, shape?: [number, number] }`
+- **MatrixOperationDto**: `{ matrixA: MatrixDto, matrixB?: MatrixDto, scalar?: number }`
+- **LinearRegressionTrainDto**: training data matrices, gradient descent options, loss function enum.
+- **LinearRegressionResultDto**: learned weights/bias as matrices, loss history, convergence metadata.
+- **PCA / SVD / QR DTOs**: located under `src/dto/` with Swagger definitions generated automatically.
+
+Refer to the Swagger UI for the complete schema definitions generated from these DTOs.
+
+## Library Usage (Node Module)
+
+The REST API is backed by reusable classes located under `src/lib`. They can be imported directly for scripted or embedded use.
+
+```typescript
+import { Matrix, PCA, GradientDescent, LinearRegression, MeanSquaredError, SVD, QR } from './lib';
+
+// Core matrix operations
+const A = new Matrix([[1, 2], [3, 4]]);
+const B = new Matrix([[5, 6], [7, 8]]);
+const sum = A.add(B);
+const determinant = A.determinant();
+const { eigenvalue, eigenvector } = A.powerIteration();
+
+// Gradient descent with linear regression
+const model = new LinearRegression(A.cols, 1);
+const optimizer = new GradientDescent(0.01, 1000, 1e-6, 'adam');
+const mse = new MeanSquaredError();
+const { losses, converged } = optimizer.optimize(model, A, new Matrix([[1], [2]]), mse);
+
+// PCA and SVD utilities
+const pca = new PCA();
+const reduced = pca.fitTransform(A, 1);
+const svd = new SVD();
+svd.decompose(A);
+const singularValues = svd.getSingularValues();
+
+// QR for solving linear systems
+const { Q, R } = QR.decompose(A);
+```
+
+## Testing
+```bash
+# Run all unit tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage report
+npm run test:cov
+
+# Target a specific suite
+npm test -- --testPathPattern=matrix.spec.ts
+```
+
+## Development
+```bash
+# Lint and format
 npm run lint
-
-# Format code
 npm run format
 ```
 
-## 📊 Mathematical Background
-
-### Matrix Operations
-- **Trace**: Sum of diagonal elements, tr(A) = Σᵢ aᵢᵢ
-- **Determinant**: Volume scaling factor of linear transformation
-- **Eigenvalues**: Scalars λ where A*v = λ*v
-- **Power Iteration**: Iterative method for dominant eigenvalue
-
-### Advanced Algorithms
-
-#### PCA
-- **Centering**: Subtract mean from each feature
-- **Covariance**: C = (1/n) * X^T * X
-- **Eigen-decomposition**: Find eigenvectors of covariance matrix
-- **Projection**: X_pca = X_centered * eigenvectors
-
-#### Gradient Descent
-- **SGD**: θ = θ - α * ∇L(θ)
-- **Momentum**: v = β*v + ∇L(θ), θ = θ - α*v
-- **Adam**: Adaptive learning rates with moment estimates
-
-#### SVD
-- **Decomposition**: A = U Σ V^T
-- **Singular Values**: Diagonal elements of Σ
-- **Low-rank**: Aₖ = Uₖ Σₖ Vₖ^T
-
-#### QR Decomposition
-- **Householder**: H = I - β*v*v^T
-- **Orthogonality**: Q^T * Q = I
-- **Linear Systems**: A*x = b → R*x = Q^T*b
-
-## 🚦 Error Handling
-
-The library provides comprehensive error handling:
-
-```typescript
-// Matrix dimension mismatches
-A.add(B); // Throws if dimensions don't match
-
-// Invalid operations on non-square matrices
-A.determinant(); // Throws if A is not square
-
-// Out of bounds access
-matrix.get(-1, 0); // Throws index error
-
-// Invalid input types
-new Matrix([[1, 'invalid']]); // Throws type error
+Demos for quick experimentation:
+```bash
+npx ts-node src/demo.ts           # Core matrix operations
+npx ts-node src/advanced-demo.ts  # PCA, SVD, QR, gradient descent
 ```
 
-## ⚡ Performance Considerations
+## Error Handling
+- Matrix shape mismatches, invalid indices, and non-square operations raise descriptive errors.
+- Scalar operations guard against `NaN` and division by zero.
+- All REST endpoints convert domain errors into HTTP 400/404 responses with helpful messages.
 
-- **Immutable Operations**: All methods return new matrices
-- **Efficient Algorithms**: Optimized implementations for numerical stability
-- **Memory Management**: No memory leaks in iterative algorithms
-- **Type Safety**: Compile-time type checking prevents runtime errors
+## Performance Considerations
+- Immutable matrix operations prevent accidental shared state.
+- Algorithms favour numerically stable approaches (Householder QR, cofactor expansion safeguards, etc.).
+- Designed for type safety and fast iteration with TypeScript generics and DTO validation.
 
-## 🤝 Contributing
+## Contributing
+1. Fork the repository.
+2. Create a feature branch.
+3. Add tests covering your change.
+4. Run linting and the full test suite.
+5. Open a pull request describing the motivation and behaviour changes.
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+## License
+Released under the **MIT License**. See `LICENSE` for details.
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 📚 References
-
-- **Linear Algebra and Its Applications** by Gilbert Strang
-- **Matrix Computations** by Gene H. Golub and Charles F. Van Loan
-- **Numerical Linear Algebra** by Lloyd N. Trefethen and David Bau III
-- **Deep Learning** by Ian Goodfellow, Yoshua Bengio, and Aaron Courville
+## References
+- *Linear Algebra and Its Applications* – Gilbert Strang.
+- *Matrix Computations* – Gene H. Golub & Charles F. Van Loan.
+- *Numerical Linear Algebra* – Lloyd N. Trefethen & David Bau III.
+- *Deep Learning* – Ian Goodfellow, Yoshua Bengio, and Aaron Courville.
 
 ---
 
-Built with ❤️ using TypeScript, NestJS, and comprehensive mathematical rigor.
+Built with ❤️ using TypeScript, NestJS, and a passion for linear algebra.

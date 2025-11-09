@@ -9,7 +9,14 @@ import {
   HttpException,
   HttpStatus
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger';
 import { MLService } from './ml.service';
 import {
   LinearRegressionTrainDto,
@@ -36,6 +43,9 @@ export class MLController {
       }
     }
   })
+  @ApiBadRequestResponse({
+    description: 'Training failed. Check matrix dimensions, loss function, and optimizer settings.'
+  })
   async trainLinearRegression(
     @Body(ValidationPipe) trainingData: LinearRegressionTrainDto
   ): Promise<{ modelId: string; result: LinearRegressionResultDto }> {
@@ -53,6 +63,12 @@ export class MLController {
   @ApiOperation({ summary: 'Make predictions with trained linear regression model' })
   @ApiParam({ name: 'modelId', description: 'ID of the trained model', example: 'linear_regression_1234567890_abc123def' })
   @ApiResponse({ status: 201, description: 'Predictions made successfully', type: LinearRegressionPredictResultDto })
+  @ApiBadRequestResponse({
+    description: 'Prediction failed. Ensure input matrix matches the model shape.'
+  })
+  @ApiNotFoundResponse({
+    description: 'Model with provided ID was not found.'
+  })
   async predictWithLinearRegression(
     @Param('modelId') modelId: string,
     @Body(ValidationPipe) predictionData: LinearRegressionPredictDto
@@ -82,7 +98,11 @@ export class MLController {
         properties: {
           modelId: { type: 'string' },
           type: { type: 'string' },
-          created: { type: 'string', format: 'date-time' }
+          created: {
+            type: 'string',
+            format: 'date-time',
+            example: '2025-11-09T10:30:15.123Z'
+          }
         }
       }
     }
@@ -104,11 +124,15 @@ export class MLController {
         type: { type: 'string' },
         weights: { $ref: '#/components/schemas/MatrixDto' },
         bias: { $ref: '#/components/schemas/MatrixDto' },
-        created: { type: 'string', format: 'date-time' }
+        created: {
+          type: 'string',
+          format: 'date-time',
+          example: '2025-11-09T10:30:15.123Z'
+        }
       }
     }
   })
-  @ApiResponse({ status: 404, description: 'Model not found' })
+  @ApiNotFoundResponse({ description: 'Model not found.' })
   getModelInfo(@Param('modelId') modelId: string): any {
     const modelInfo = this.mlService.getModelInfo(modelId);
     if (!modelInfo) {

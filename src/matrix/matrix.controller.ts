@@ -8,7 +8,14 @@ import {
   Query,
   ValidationPipe
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger';
 import { MatrixService } from './matrix.service';
 import {
   MatrixDto,
@@ -26,6 +33,9 @@ export class MatrixController {
   @ApiOperation({ summary: 'Create identity matrix' })
   @ApiParam({ name: 'size', description: 'Size of the square identity matrix', example: 3 })
   @ApiResponse({ status: 201, description: 'Identity matrix created', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Validation failed. Ensure size is a positive integer.'
+  })
   createIdentity(@Param('size', ParseIntPipe) size: number): MatrixResultDto {
     return this.matrixService.createIdentity(size);
   }
@@ -35,6 +45,9 @@ export class MatrixController {
   @ApiQuery({ name: 'rows', description: 'Number of rows', example: 2 })
   @ApiQuery({ name: 'cols', description: 'Number of columns', example: 3 })
   @ApiResponse({ status: 201, description: 'Zeros matrix created', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Validation failed. Ensure rows and cols are positive integers.'
+  })
   createZeros(
     @Query('rows', ParseIntPipe) rows: number,
     @Query('cols', ParseIntPipe) cols: number
@@ -47,6 +60,9 @@ export class MatrixController {
   @ApiQuery({ name: 'rows', description: 'Number of rows', example: 2 })
   @ApiQuery({ name: 'cols', description: 'Number of columns', example: 3 })
   @ApiResponse({ status: 201, description: 'Ones matrix created', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Validation failed. Ensure rows and cols are positive integers.'
+  })
   createOnes(
     @Query('rows', ParseIntPipe) rows: number,
     @Query('cols', ParseIntPipe) cols: number
@@ -57,6 +73,9 @@ export class MatrixController {
   @Post('add')
   @ApiOperation({ summary: 'Add two matrices' })
   @ApiResponse({ status: 201, description: 'Matrices added', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Matrices must have matching shapes and matrixB is required.'
+  })
   addMatrices(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (!operation.matrixB) {
       throw new BadRequestException('Second matrix (matrixB) is required for addition');
@@ -67,6 +86,9 @@ export class MatrixController {
   @Post('subtract')
   @ApiOperation({ summary: 'Subtract two matrices' })
   @ApiResponse({ status: 201, description: 'Matrices subtracted', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Matrices must have matching shapes and matrixB is required.'
+  })
   subtractMatrices(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (!operation.matrixB) {
       throw new BadRequestException('Second matrix (matrixB) is required for subtraction');
@@ -77,6 +99,9 @@ export class MatrixController {
   @Post('multiply')
   @ApiOperation({ summary: 'Multiply two matrices' })
   @ApiResponse({ status: 201, description: 'Matrices multiplied', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'matrixB is required and inner dimensions must align for multiplication.'
+  })
   multiplyMatrices(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (!operation.matrixB) {
       throw new BadRequestException('Second matrix (matrixB) is required for multiplication');
@@ -87,6 +112,9 @@ export class MatrixController {
   @Post('multiply-scalar')
   @ApiOperation({ summary: 'Multiply matrix by scalar' })
   @ApiResponse({ status: 201, description: 'Matrix multiplied by scalar', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Scalar value is required and must be numeric.'
+  })
   multiplyByScalar(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (operation.scalar === undefined) {
       throw new BadRequestException('Scalar value is required for scalar multiplication');
@@ -97,6 +125,9 @@ export class MatrixController {
   @Post('divide-scalar')
   @ApiOperation({ summary: 'Divide matrix by scalar' })
   @ApiResponse({ status: 201, description: 'Matrix divided by scalar', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Scalar value is required, must be numeric, and cannot be zero.'
+  })
   divideByScalar(@Body(ValidationPipe) operation: MatrixOperationDto): MatrixResultDto {
     if (operation.scalar === undefined) {
       throw new BadRequestException('Scalar value is required for scalar division');
@@ -107,6 +138,9 @@ export class MatrixController {
   @Post('transpose')
   @ApiOperation({ summary: 'Transpose matrix' })
   @ApiResponse({ status: 201, description: 'Matrix transposed', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Validation failed. Ensure matrix payload is valid.'
+  })
   transposeMatrix(@Body(ValidationPipe) body: { matrix: MatrixDto }): MatrixResultDto {
     return this.matrixService.transposeMatrix(body.matrix);
   }
@@ -114,6 +148,9 @@ export class MatrixController {
   @Post('trace')
   @ApiOperation({ summary: 'Calculate matrix trace' })
   @ApiResponse({ status: 201, description: 'Matrix trace calculated' })
+  @ApiBadRequestResponse({
+    description: 'Trace is only defined for square matrices.'
+  })
   calculateTrace(@Body(ValidationPipe) body: { matrix: MatrixDto }): { trace: number; matrix: MatrixDto } {
     return this.matrixService.calculateTrace(body.matrix);
   }
@@ -121,6 +158,9 @@ export class MatrixController {
   @Post('determinant')
   @ApiOperation({ summary: 'Calculate matrix determinant' })
   @ApiResponse({ status: 201, description: 'Matrix determinant calculated' })
+  @ApiBadRequestResponse({
+    description: 'Determinant is only defined for square matrices.'
+  })
   calculateDeterminant(@Body(ValidationPipe) body: { matrix: MatrixDto }): { determinant: number; matrix: MatrixDto } {
     return this.matrixService.calculateDeterminant(body.matrix);
   }
@@ -128,6 +168,9 @@ export class MatrixController {
   @Post('eigenvalues')
   @ApiOperation({ summary: 'Calculate dominant eigenvalue and eigenvector' })
   @ApiResponse({ status: 201, description: 'Eigenvalues calculated', type: EigenvalueResultDto })
+  @ApiBadRequestResponse({
+    description: 'Ensure the matrix is square and numerically stable for power iteration.'
+  })
   calculateEigenvalues(@Body(ValidationPipe) body: { matrix: MatrixDto }): EigenvalueResultDto {
     return this.matrixService.calculateEigenvalues(body.matrix);
   }
@@ -135,6 +178,9 @@ export class MatrixController {
   @Post('info')
   @ApiOperation({ summary: 'Get matrix information and properties' })
   @ApiResponse({ status: 201, description: 'Matrix information retrieved' })
+  @ApiBadRequestResponse({
+    description: 'Validation failed. Ensure matrix payload is valid.'
+  })
   getMatrixInfo(@Body(ValidationPipe) body: { matrix: MatrixDto }): {
     matrix: MatrixDto;
     properties: {
@@ -151,6 +197,9 @@ export class MatrixController {
   @Post('clone')
   @ApiOperation({ summary: 'Clone matrix' })
   @ApiResponse({ status: 201, description: 'Matrix cloned', type: MatrixResultDto })
+  @ApiBadRequestResponse({
+    description: 'Validation failed. Ensure matrix payload is valid.'
+  })
   cloneMatrix(@Body(ValidationPipe) body: { matrix: MatrixDto }): MatrixResultDto {
     return this.matrixService.cloneMatrix(body.matrix);
   }
@@ -159,6 +208,9 @@ export class MatrixController {
   @ApiOperation({ summary: 'Check if two matrices are equal' })
   @ApiQuery({ name: 'tolerance', description: 'Tolerance for floating point comparison', example: 1e-10, required: false })
   @ApiResponse({ status: 201, description: 'Matrix equality checked' })
+  @ApiBadRequestResponse({
+    description: 'Validation failed. Provide both matrices for comparison.'
+  })
   areMatricesEqual(
     @Body(ValidationPipe) body: { matrixA: MatrixDto; matrixB: MatrixDto },
     @Query('tolerance') tolerance?: string
