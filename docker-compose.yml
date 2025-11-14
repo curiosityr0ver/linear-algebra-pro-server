@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   linear-algebra-pro-server:
     image: curiosityr0ver/linear-algebra-pro-server:latest

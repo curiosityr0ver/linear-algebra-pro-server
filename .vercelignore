@@ -1,0 +1,49 @@
+# Test files
+test/
+*.spec.ts
+*.e2e-spec.ts
+coverage/
+
+# Development files
+.vscode/
+.idea/
+*.launch
+.settings/
+
+# Docker files
+Dockerfile
+docker-compose.yml
+docker-compose.prod.yml
+.dockerignore
+
+# Kubernetes files
+k8s/
+
+# Documentation
+*.md
+!README.md
+
+# CI/CD
+.github/
+
+# Logs
+*.log
+logs/
+
+# Environment files (Vercel handles these)
+.env
+.env.*
+
+# Build artifacts (will be rebuilt)
+dist/
+
+# Temporary files
+.temp/
+.tmp/
+*.pid
+*.seed
+
+# OS files
+.DS_Store
+Thumbs.db
+
