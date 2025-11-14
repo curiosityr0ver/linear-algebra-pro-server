@@ -14,6 +14,19 @@ async function createApp(): Promise<INestApplication> {
   }
 
   const expressApp = express();
+  
+  // Patch Express app to avoid 'app.router' deprecation error
+  // Express 4.x throws an error when accessing app.router, but NestJS still checks for it
+  // Override the router getter to return a mock router object instead of throwing
+  Object.defineProperty(expressApp, 'router', {
+    get: function() {
+      return {
+        stack: [],
+      };
+    },
+    configurable: true,
+  });
+  
   const adapter = new ExpressAdapter(expressApp);
   const app = await NestFactory.create(AppModule, adapter, {
     logger: false,
