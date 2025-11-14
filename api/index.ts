@@ -13,19 +13,26 @@ async function createApp(): Promise<INestApplication> {
     return cachedApp;
   }
 
-  const expressApp = express();
-  
-  // Patch Express app to avoid 'app.router' deprecation error
+  // Patch ExpressAdapter to avoid 'app.router' deprecation error
   // Express 4.x throws an error when accessing app.router, but NestJS still checks for it
-  // Override the router getter to return a mock router object instead of throwing
-  Object.defineProperty(expressApp, 'router', {
-    get: function() {
-      return {
-        stack: [],
-      };
-    },
-    configurable: true,
-  });
+  // We need to patch the ExpressAdapter's isMiddlewareApplied method before creating the adapter
+  const ExpressAdapterPrototype = ExpressAdapter.prototype as any;
+  if (ExpressAdapterPrototype && ExpressAdapterPrototype.isMiddlewareApplied) {
+    const originalIsMiddlewareApplied = ExpressAdapterPrototype.isMiddlewareApplied;
+    ExpressAdapterPrototype.isMiddlewareApplied = function(middleware: any) {
+      try {
+        return originalIsMiddlewareApplied.call(this, middleware);
+      } catch (error: any) {
+        // If accessing app.router throws (Express 4.x), assume middleware is not applied
+        if (error && error.message && error.message.includes('app.router')) {
+          return false;
+        }
+        throw error;
+      }
+    };
+  }
+
+  const expressApp = express();
   
   const adapter = new ExpressAdapter(expressApp);
   const app = await NestFactory.create(AppModule, adapter, {
