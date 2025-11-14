@@ -4,14 +4,14 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MatrixDto {
   @ApiProperty({
-    description: '2D array representing the matrix',
+    description: '2D array representing the matrix. rows, cols, and shape are optional and will be inferred from data if not provided.',
     example: [[1, 2, 3], [4, 5, 6]]
   })
   @IsArray()
   data: number[][];
 
   @ApiPropertyOptional({
-    description: 'Number of rows',
+    description: 'Number of rows (optional - inferred from data if not provided)',
     example: 2
   })
   @IsOptional()
@@ -19,7 +19,7 @@ export class MatrixDto {
   rows?: number;
 
   @ApiPropertyOptional({
-    description: 'Number of columns',
+    description: 'Number of columns (optional - inferred from data if not provided)',
     example: 3
   })
   @IsOptional()
@@ -27,7 +27,7 @@ export class MatrixDto {
   cols?: number;
 
   @ApiPropertyOptional({
-    description: 'Matrix shape as [rows, cols]',
+    description: 'Matrix shape as [rows, cols] (optional - inferred from data if not provided)',
     example: [2, 3]
   })
   @IsOptional()
@@ -40,16 +40,22 @@ export class MatrixDto {
 export class MatrixOperationDto {
   @ApiProperty({
     description: 'First matrix',
-    type: MatrixDto
+    type: MatrixDto,
+    example: {
+      data: [[1, 2, 3], [4, 5, 6]]
+    }
   })
   @ValidateNested()
   @Type(() => MatrixDto)
   matrixA: MatrixDto;
 
   @ApiProperty({
-    description: 'Second matrix (for binary operations)',
+    description: 'Second matrix (for binary operations). For multiplication: if matrixA is m×n, matrixB must be n×p. Example: 2×3 × 3×2 = 2×2',
     type: MatrixDto,
-    required: false
+    required: false,
+    example: {
+      data: [[7, 8], [9, 10], [11, 12]]
+    }
   })
   @IsOptional()
   @ValidateNested()
