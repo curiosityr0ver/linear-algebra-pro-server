@@ -78,6 +78,8 @@ async function createApp(): Promise<INestApplication> {
       'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js',
       'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js',
     ],
+    customfavIcon: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/favicon-32x32.png',
+    customSiteTitle: 'Linear Algebra Pro API',
     swaggerOptions: {
       persistAuthorization: true,
       displayRequestDuration: true,
