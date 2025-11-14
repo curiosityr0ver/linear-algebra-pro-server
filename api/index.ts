@@ -1,13 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from '../src/app.module';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 
-let cachedApp: express.Express;
+let cachedApp: INestApplication;
 
-async function createApp(): Promise<express.Express> {
+async function createApp(): Promise<INestApplication> {
   if (cachedApp) {
     return cachedApp;
   }
@@ -59,12 +60,23 @@ async function createApp(): Promise<express.Express> {
   });
 
   await app.init();
-  cachedApp = expressApp;
+  cachedApp = app;
   return cachedApp;
 }
 
-export default async function handler(req: express.Request, res: express.Response) {
-  const app = await createApp();
-  app(req, res);
+export default async function handler(req: Request, res: Response) {
+  try {
+    const app = await createApp();
+    const expressInstance = app.getHttpAdapter().getInstance();
+    expressInstance(req, res);
+  } catch (error) {
+    console.error('Handler error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
 }
 
