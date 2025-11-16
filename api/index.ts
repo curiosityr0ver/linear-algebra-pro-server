@@ -46,6 +46,14 @@ async function createApp(): Promise<INestApplication> {
     .split(',')
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
+  
+  // Debug logging (will appear in Vercel function logs)
+  console.log('🔐 CORS Configuration:', {
+    CLIENT_ORIGIN: process.env.CLIENT_ORIGIN,
+    rawOrigins,
+    parsedOrigins: origins,
+  });
+  
   app.enableCors({
     origin: origins,
     credentials: true,
