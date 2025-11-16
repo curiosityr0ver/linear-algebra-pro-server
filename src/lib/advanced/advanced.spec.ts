@@ -95,6 +95,21 @@ describe('Advanced Linear Algebra Algorithms', () => {
       expect(XTrainTransformed.rows).toBe(XTrain.rows);
       expect(XTestTransformed.rows).toBe(XTest.rows);
     });
+
+    it('should handle singular covariance matrices without errors', () => {
+      const singularData = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+      ];
+      const X = new Matrix(singularData);
+      const pca = new PCA();
+
+      expect(() => pca.fitTransform(X, 2)).not.toThrow();
+      const components = pca.getComponents();
+      expect(components.rows).toBeLessThanOrEqual(2);
+      expect(components.cols).toBe(3);
+    });
   });
 
   describe('Gradient Descent', () => {

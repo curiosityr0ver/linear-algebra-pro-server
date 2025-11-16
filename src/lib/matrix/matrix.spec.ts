@@ -444,6 +444,16 @@ describe('Matrix', () => {
       const result = matrix.powerIteration(10);
       expect(result.eigenvalue).toBeCloseTo(2, 2); // Should find eigenvalue 2
     });
+
+    it('should gracefully handle zero matrices without NaN', () => {
+      const matrix = Matrix.zeros(3, 3);
+      const result = matrix.powerIteration();
+
+      expect(result.eigenvalue).toBe(0);
+      expect(result.eigenvector.rows).toBe(3);
+      expect(result.eigenvector.cols).toBe(1);
+      expect(result.eigenvector.data.every(([value]) => value === 0)).toBe(true);
+    });
   });
 
   describe('toString', () => {

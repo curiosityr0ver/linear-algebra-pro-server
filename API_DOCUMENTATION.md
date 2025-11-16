@@ -381,6 +381,8 @@ POST /advanced/pca/transform
 }
 ```
 
+> **Note:** The transform endpoint expects the entire `/advanced/pca/train` response, including the new `mean` field. Calls that reuse cached payloads from older server versions (without `mean`) will fail with `400 Bad Request`.
+
 ### 2.2 Singular Value Decomposition (SVD)
 
 #### Decompose Matrix

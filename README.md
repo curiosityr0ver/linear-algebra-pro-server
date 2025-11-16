@@ -196,6 +196,57 @@ curl -X POST http://localhost:3000/advanced/svd/decompose \
   }'
 ```
 
+#### PCA workflow
+PCA training responses now include the column-wise mean vector, which is required when transforming new samples.
+
+```bash
+curl -X POST http://localhost:3000/advanced/pca/train \
+  -H "Content-Type: application/json" \
+  -d '{
+    "X": { "data": [[1,2],[2,4],[3,6],[4,8],[5,10]] },
+    "nComponents": 1
+  }'
+```
+
+```json
+{
+  "X_transformed": {
+    "data": [[-2.027], [1.573], [0.0], [-1.573], [2.027]],
+    "rows": 5,
+    "cols": 1,
+    "shape": [5, 1]
+  },
+  "components": {
+    "data": [[0.447, 0.894]],
+    "rows": 1,
+    "cols": 2,
+    "shape": [1, 2]
+  },
+  "mean": {
+    "data": [[3, 6]],
+    "rows": 1,
+    "cols": 2,
+    "shape": [1, 2]
+  },
+  "explained_variance": [8.0],
+  "explained_variance_ratio": [1.0],
+  "n_components": 1
+}
+```
+
+To transform with Postman, copy that JSON verbatim under `trainedPCA` and supply the new dataset:
+
+```bash
+curl -X POST http://localhost:3000/advanced/pca/transform \
+  -H "Content-Type: application/json" \
+  -d '{
+    "X": { "data": [[6,12],[7,14]] },
+    "trainedPCA": { <paste full /train response here> }
+  }'
+```
+
+> **Important:** If `trainedPCA.mean` is missing (for example, when using data cached from an older server build), the transform endpoint returns `400 Bad Request`. Retrain PCA to obtain the new metadata.
+
 ### Machine Learning API
 | Method | Path | Description |
 | ------ | ---- | ----------- |

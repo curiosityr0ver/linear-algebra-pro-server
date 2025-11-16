@@ -468,6 +468,14 @@ export class Matrix {
 
       // Normalize the new vector
       const norm = Math.sqrt(normSquared);
+      if (!isFinite(norm) || norm === 0) {
+        return {
+          eigenvalue: 0,
+          eigenvector: Matrix.zeros(this._rows, 1),
+          iterations: iter + 1,
+          converged: false,
+        };
+      }
       for (let i = 0; i < this._rows; i++) {
         v.set(i, 0, vNew.get(i, 0) / norm);
       }
