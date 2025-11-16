@@ -9,6 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS for configured origins
+  // Default to localhost for development; production should set CLIENT_ORIGIN env var
   const rawOrigins = process.env.CLIENT_ORIGIN ?? 'http://localhost:3000';
   const origins = rawOrigins
     .split(',')
