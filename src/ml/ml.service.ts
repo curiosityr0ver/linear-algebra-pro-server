@@ -15,9 +15,35 @@ import {
   OptimizationMethod
 } from '../dto';
 
+type TrainedModelMetadata = {
+  lossHistory: number[];
+  converged: boolean;
+  iterations: number;
+  finalLoss: number;
+  lossFunction: LossFunctionEnum;
+  optimizer: OptimizationMethod;
+};
+
+type TrainedModelEntry = {
+  model: LinearRegression;
+  createdAt: number;
+  metadata: TrainedModelMetadata;
+};
+
+type TrainedModelSummary = {
+  modelId: string;
+  type: string;
+  created: string;
+  optimizer: OptimizationMethod;
+  lossFunction: LossFunctionEnum;
+  iterations: number;
+  final_loss: number;
+  converged: boolean;
+};
+
 @Injectable()
 export class MLService {
-  private trainedModels = new Map<string, { model: LinearRegression; createdAt: number }>();
+  private trainedModels = new Map<string, TrainedModelEntry>();
 
   /**
    * Convert 2D array to Matrix
@@ -84,11 +110,12 @@ export class MLService {
 
     // Set up optimizer
     const options = trainingData.options || {};
+    const optimizerMethod = options.method || OptimizationMethod.SGD;
     const optimizer = new GradientDescent(
       options.learningRate,
       options.maxIterations,
       options.tolerance,
-      options.method,
+      optimizerMethod,
       {
         momentumBeta: options.momentumBeta,
         adamBeta1: options.adamBeta1,
@@ -106,7 +133,18 @@ export class MLService {
     // Store trained model
     const createdAt = Date.now();
     const modelId = `linear_regression_${createdAt}_${Math.random().toString(36).substr(2, 9)}`;
-    this.trainedModels.set(modelId, { model, createdAt });
+    this.trainedModels.set(modelId, {
+      model,
+      createdAt,
+      metadata: {
+        lossHistory: trainingResult.losses,
+        converged: trainingResult.converged,
+        iterations: trainingResult.iterations,
+        finalLoss: trainingResult.losses[trainingResult.losses.length - 1],
+        lossFunction: trainingData.lossFunction || LossFunctionEnum.MSE,
+        optimizer: optimizerMethod
+      }
+    });
 
     const result: LinearRegressionResultDto = {
       weights: this.matrixToDto(model.getParameters()[0]),
@@ -143,13 +181,18 @@ export class MLService {
   /**
    * Get list of trained models
    */
-  getTrainedModels(): { modelId: string; type: string; created: string }[] {
-    const models: { modelId: string; type: string; created: string }[] = [];
+  getTrainedModels(): TrainedModelSummary[] {
+    const models: TrainedModelSummary[] = [];
     for (const [modelId, entry] of this.trainedModels) {
       models.push({
         modelId,
         type: 'linear_regression',
-        created: this.toIsoStringSafe(entry.createdAt)
+        created: this.toIsoStringSafe(entry.createdAt),
+        optimizer: entry.metadata.optimizer,
+        lossFunction: entry.metadata.lossFunction,
+        iterations: entry.metadata.iterations,
+        final_loss: entry.metadata.finalLoss,
+        converged: entry.metadata.converged
       });
     }
     return models;
@@ -172,6 +215,14 @@ export class MLService {
     weights: any;
     bias: any;
     created: string;
+    training: {
+      iterations: number;
+      converged: boolean;
+      final_loss: number;
+      lossFunction: LossFunctionEnum;
+      optimizer: OptimizationMethod;
+      loss_history: number[];
+    };
   } | null {
     const entry = this.trainedModels.get(modelId);
     if (!entry) {
@@ -185,7 +236,43 @@ export class MLService {
       type: 'linear_regression',
       weights: this.matrixToDto(weights),
       bias: this.matrixToDto(bias),
-      created: this.toIsoStringSafe(entry.createdAt)
+      created: this.toIsoStringSafe(entry.createdAt),
+      training: {
+        iterations: entry.metadata.iterations,
+        converged: entry.metadata.converged,
+        final_loss: entry.metadata.finalLoss,
+        lossFunction: entry.metadata.lossFunction,
+        optimizer: entry.metadata.optimizer,
+        loss_history: entry.metadata.lossHistory
+      }
+    };
+  }
+
+  /**
+   * Retrieve training history for a specific model
+   */
+  getModelHistory(modelId: string): {
+    modelId: string;
+    loss_history: number[];
+    iterations: number;
+    converged: boolean;
+    final_loss: number;
+    lossFunction: LossFunctionEnum;
+    optimizer: OptimizationMethod;
+  } | null {
+    const entry = this.trainedModels.get(modelId);
+    if (!entry) {
+      return null;
+    }
+
+    return {
+      modelId,
+      loss_history: entry.metadata.lossHistory,
+      iterations: entry.metadata.iterations,
+      converged: entry.metadata.converged,
+      final_loss: entry.metadata.finalLoss,
+      lossFunction: entry.metadata.lossFunction,
+      optimizer: entry.metadata.optimizer
     };
   }
 }

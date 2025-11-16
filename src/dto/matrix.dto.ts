@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, ValidateNested, ArrayMinSize, IsOptional } from 'class-validator';
+import { IsArray, IsNumber, ValidateNested, ArrayMinSize, IsOptional, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -71,6 +71,47 @@ export class MatrixOperationDto {
   scalar?: number;
 }
 
+export class EigenvalueOptionsDto {
+  @ApiPropertyOptional({
+    description: 'Maximum iterations for the power iteration algorithm',
+    example: 500,
+    minimum: 1
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  maxIterations?: number = 1000;
+
+  @ApiPropertyOptional({
+    description: 'Convergence tolerance for the power iteration algorithm',
+    example: 1e-8,
+    minimum: 0
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  tolerance?: number = 1e-10;
+}
+
+export class EigenvalueOperationDto {
+  @ApiProperty({
+    description: 'Matrix to analyze',
+    type: MatrixDto
+  })
+  @ValidateNested()
+  @Type(() => MatrixDto)
+  matrix: MatrixDto;
+
+  @ApiPropertyOptional({
+    description: 'Optional settings for the power iteration algorithm',
+    type: EigenvalueOptionsDto
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => EigenvalueOptionsDto)
+  options?: EigenvalueOptionsDto;
+}
+
 export class MatrixResultDto {
   @ApiProperty({
     description: 'Result matrix',
@@ -98,4 +139,28 @@ export class EigenvalueResultDto {
     type: MatrixDto
   })
   eigenvector: MatrixDto;
+
+  @ApiProperty({
+    description: 'Number of power-iteration steps that were executed',
+    example: 42
+  })
+  iterations: number;
+
+  @ApiProperty({
+    description: 'Whether convergence was detected before reaching maxIterations',
+    example: true
+  })
+  converged: boolean;
+
+  @ApiProperty({
+    description: 'Tolerance that was used for convergence checking',
+    example: 1e-8
+  })
+  tolerance: number;
+
+  @ApiProperty({
+    description: 'Maximum iterations allowed for the computation',
+    example: 1000
+  })
+  maxIterations: number;
 }

@@ -70,6 +70,11 @@ describe('MLController (e2e)', () => {
     expect(modelEntry.type).toBe('linear_regression');
     expect(modelEntry.created).not.toBe('Invalid Date');
     expect(Number.isNaN(new Date(modelEntry.created).getTime())).toBe(false);
+    expect(modelEntry.optimizer).toBeDefined();
+    expect(modelEntry.lossFunction).toBeDefined();
+    expect(typeof modelEntry.iterations).toBe('number');
+    expect(typeof modelEntry.final_loss).toBe('number');
+    expect(typeof modelEntry.converged).toBe('boolean');
   });
 
   it('predicts with the trained model', async () => {
@@ -130,6 +135,27 @@ describe('MLController (e2e)', () => {
     expect(response.body.created).not.toBe('Invalid Date');
     expect(response.body.weights).toBeDefined();
     expect(response.body.bias).toBeDefined();
+    expect(response.body.training).toBeDefined();
+    expect(response.body.training.loss_history.length).toBeGreaterThan(0);
+    expect(typeof response.body.training.final_loss).toBe('number');
+    expect(typeof response.body.training.iterations).toBe('number');
+  });
+
+  it('returns training history for a model', async () => {
+    expect(trainedModelId).toBeDefined();
+    const modelId = trainedModelId as string;
+
+    const response = await request(app.getHttpServer())
+      .get(`/ml/models/${modelId}/history`)
+      .expect(200);
+
+    expect(response.body.modelId).toBe(modelId);
+    expect(Array.isArray(response.body.loss_history)).toBe(true);
+    expect(response.body.loss_history.length).toBeGreaterThan(0);
+    expect(typeof response.body.iterations).toBe('number');
+    expect(typeof response.body.final_loss).toBe('number');
+    expect(response.body.lossFunction).toBeDefined();
+    expect(response.body.optimizer).toBeDefined();
   });
 });
 

@@ -22,7 +22,9 @@ import {
   LinearRegressionTrainDto,
   LinearRegressionResultDto,
   LinearRegressionPredictDto,
-  LinearRegressionPredictResultDto
+  LinearRegressionPredictResultDto,
+  LinearRegressionHistoryDto,
+  TrainedModelSummaryDto
 } from '../dto';
 
 @ApiTags('Machine Learning')
@@ -102,12 +104,17 @@ export class MLController {
             type: 'string',
             format: 'date-time',
             example: '2025-11-09T10:30:15.123Z'
-          }
+          },
+          optimizer: { type: 'string', enum: ['sgd', 'momentum', 'adam'] },
+          lossFunction: { type: 'string', enum: ['mse', 'binary_crossentropy'] },
+          iterations: { type: 'number', example: 120 },
+          final_loss: { type: 'number', example: 0.0123 },
+          converged: { type: 'boolean', example: true }
         }
       }
     }
   })
-  getTrainedModels(): { modelId: string; type: string; created: string }[] {
+  getTrainedModels(): TrainedModelSummaryDto[] {
     return this.mlService.getTrainedModels();
   }
 
@@ -116,7 +123,7 @@ export class MLController {
   @ApiParam({ name: 'modelId', description: 'ID of the trained model', example: 'linear_regression_1234567890_abc123def' })
   @ApiResponse({
     status: 200,
-    description: 'Model information retrieved',
+    description: 'Model information retrieved along with training metadata',
     schema: {
       type: 'object',
       properties: {
@@ -128,6 +135,20 @@ export class MLController {
           type: 'string',
           format: 'date-time',
           example: '2025-11-09T10:30:15.123Z'
+        },
+        training: {
+          type: 'object',
+          properties: {
+            iterations: { type: 'number' },
+            converged: { type: 'boolean' },
+            final_loss: { type: 'number' },
+            lossFunction: { type: 'string', enum: ['mse', 'binary_crossentropy'] },
+            optimizer: { type: 'string', enum: ['sgd', 'momentum', 'adam'] },
+            loss_history: {
+              type: 'array',
+              items: { type: 'number' }
+            }
+          }
         }
       }
     }
@@ -139,6 +160,19 @@ export class MLController {
       throw new HttpException('Model not found', HttpStatus.NOT_FOUND);
     }
     return modelInfo;
+  }
+
+  @Get('models/:modelId/history')
+  @ApiOperation({ summary: 'Get training history (loss curve) for a model' })
+  @ApiParam({ name: 'modelId', description: 'ID of the trained model', example: 'linear_regression_1234567890_abc123def' })
+  @ApiResponse({ status: 200, description: 'Training history returned', type: LinearRegressionHistoryDto })
+  @ApiNotFoundResponse({ description: 'Model not found.' })
+  getModelHistory(@Param('modelId') modelId: string): LinearRegressionHistoryDto {
+    const history = this.mlService.getModelHistory(modelId);
+    if (!history) {
+      throw new HttpException('Model not found', HttpStatus.NOT_FOUND);
+    }
+    return history;
   }
 
   @Delete('models/:modelId')

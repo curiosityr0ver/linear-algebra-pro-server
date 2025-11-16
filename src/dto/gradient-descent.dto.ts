@@ -197,3 +197,105 @@ export class LinearRegressionPredictResultDto {
   })
   predictions: MatrixDto;
 }
+
+export class TrainedModelSummaryDto {
+  @ApiProperty({
+    description: 'Unique identifier of the trained model'
+  })
+  @IsString()
+  modelId: string;
+
+  @ApiProperty({
+    description: 'Type of model',
+    example: 'linear_regression'
+  })
+  @IsString()
+  type: string;
+
+  @ApiProperty({
+    description: 'ISO timestamp when the model was trained',
+    example: '2025-11-09T10:30:15.123Z'
+  })
+  @IsString()
+  created: string;
+
+  @ApiProperty({
+    description: 'Optimization method that was used during training',
+    enum: OptimizationMethod
+  })
+  optimizer: OptimizationMethod;
+
+  @ApiProperty({
+    description: 'Loss function that was optimized',
+    enum: LossFunction
+  })
+  lossFunction: LossFunction;
+
+  @ApiProperty({
+    description: 'Final loss achieved at the end of training',
+    example: 0.0123
+  })
+  @IsNumber()
+  final_loss: number;
+
+  @ApiProperty({
+    description: 'Total iterations that were executed',
+    example: 120
+  })
+  @IsNumber()
+  iterations: number;
+
+  @ApiProperty({
+    description: 'Whether the optimization converged before reaching the iteration limit',
+    example: true
+  })
+  converged: boolean;
+}
+
+export class LinearRegressionHistoryDto {
+  @ApiProperty({
+    description: 'Identifier of the trained model'
+  })
+  @IsString()
+  modelId: string;
+
+  @ApiProperty({
+    description: 'Loss value captured after each iteration',
+    example: [10.5, 3.2, 0.6, 0.05]
+  })
+  @IsArray()
+  @IsNumber({}, { each: true })
+  loss_history: number[];
+
+  @ApiProperty({
+    description: 'Total iterations executed during training',
+    example: 80
+  })
+  @IsNumber()
+  iterations: number;
+
+  @ApiProperty({
+    description: 'Final loss achieved at the end of training',
+    example: 0.004
+  })
+  @IsNumber()
+  final_loss: number;
+
+  @ApiProperty({
+    description: 'Whether the training converged within the specified tolerance',
+    example: true
+  })
+  converged: boolean;
+
+  @ApiProperty({
+    description: 'Loss function used during training',
+    enum: LossFunction
+  })
+  lossFunction: LossFunction;
+
+  @ApiProperty({
+    description: 'Optimizer that was used to minimize the loss',
+    enum: OptimizationMethod
+  })
+  optimizer: OptimizationMethod;
+}

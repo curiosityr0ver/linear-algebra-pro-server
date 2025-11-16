@@ -97,5 +97,57 @@ describe('MatrixController (e2e)', () => {
       );
     });
   });
+
+  describe('POST /matrix/trace', () => {
+    it('returns the diagonal sum for square matrices', async () => {
+      const payload = {
+        matrix: {
+          data: [
+            [2, 1, 0],
+            [0, 3, 4],
+            [5, 6, 7],
+          ],
+        },
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/matrix/trace')
+        .send(payload)
+        .expect(201);
+
+      expect(response.body.trace).toBe(12); // 2 + 3 + 7
+      expect(response.body.matrix.shape).toEqual([3, 3]);
+    });
+  });
+
+  describe('POST /matrix/eigenvalues', () => {
+    it('returns eigenvalue metadata and respects options', async () => {
+      const payload = {
+        matrix: {
+          data: [
+            [4, 1],
+            [1, 2],
+          ],
+        },
+        options: {
+          maxIterations: 300,
+          tolerance: 1e-8,
+        },
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/matrix/eigenvalues')
+        .send(payload)
+        .expect(201);
+
+      expect(response.body.eigenvalue).toBeCloseTo(4.4142, 3);
+      expect(response.body.iterations).toBeGreaterThan(0);
+      expect(response.body.converged).toBe(true);
+      expect(response.body.maxIterations).toBe(300);
+      expect(response.body.tolerance).toBeCloseTo(1e-8, 12);
+      expect(response.body.eigenvector.rows).toBe(2);
+      expect(response.body.eigenvector.cols).toBe(1);
+    });
+  });
 });
 

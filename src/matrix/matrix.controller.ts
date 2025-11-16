@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -21,7 +22,8 @@ import {
   MatrixDto,
   MatrixResultDto,
   EigenvalueResultDto,
-  MatrixOperationDto
+  MatrixOperationDto,
+  EigenvalueOperationDto
 } from '../dto';
 
 @ApiTags('Matrix Operations')
@@ -167,12 +169,13 @@ export class MatrixController {
 
   @Post('eigenvalues')
   @ApiOperation({ summary: 'Calculate dominant eigenvalue and eigenvector' })
+  @ApiBody({ type: EigenvalueOperationDto })
   @ApiResponse({ status: 201, description: 'Eigenvalues calculated', type: EigenvalueResultDto })
   @ApiBadRequestResponse({
     description: 'Ensure the matrix is square and numerically stable for power iteration.'
   })
-  calculateEigenvalues(@Body(ValidationPipe) body: { matrix: MatrixDto }): EigenvalueResultDto {
-    return this.matrixService.calculateEigenvalues(body.matrix);
+  calculateEigenvalues(@Body(ValidationPipe) body: EigenvalueOperationDto): EigenvalueResultDto {
+    return this.matrixService.calculateEigenvalues(body);
   }
 
   @Post('info')

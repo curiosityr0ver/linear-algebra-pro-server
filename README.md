@@ -199,4 +199,66 @@ curl -X POST http://localhost:3000/advanced/svd/decompose \
 ### Machine Learning API
 | Method | Path | Description |
 | ------ | ---- | ----------- |
-| `POST`
+| `POST` | `/ml/linear-regression/train` | Train a linear regression model and persist the weights, bias, and loss history. |
+| `POST` | `/ml/linear-regression/:modelId/predict` | Generate predictions with a previously trained model. |
+| `GET` | `/ml/models` | List all trained models with optimizer, loss function, convergence flag, and final loss summary. |
+| `GET` | `/ml/models/:modelId` | Retrieve the stored parameters plus training metadata (iterations, convergence, optimizer, loss function). |
+| `GET` | `/ml/models/:modelId/history` | Fetch the exact loss curve that was recorded during training for downstream charting. |
+| `DELETE` | `/ml/models/:modelId` | Delete a trained model and free its memory.
+
+#### Sample payloads for Postman
+
+**Train linear regression**
+```http
+POST /ml/linear-regression/train
+Content-Type: application/json
+
+{
+  "X": { "data": [[1], [2], [3], [4]] },
+  "y": { "data": [[3], [5], [7], [9]] },
+  "options": {
+    "learningRate": 0.05,
+    "maxIterations": 200,
+    "tolerance": 1e-6,
+    "method": "adam"
+  },
+  "lossFunction": "mse"
+}
+```
+
+**Predict with a trained model**
+```http
+POST /ml/linear-regression/<modelId>/predict
+Content-Type: application/json
+
+{
+  "X": { "data": [[5], [6], [7]] }
+}
+```
+
+**Inspect model metadata (training summary)**
+```http
+GET /ml/models/<modelId>
+```
+
+**Fetch loss-history curve**
+```http
+GET /ml/models/<modelId>/history
+```
+
+> Paste the JSON bodies directly into Postman’s “raw + JSON” mode to reproduce the training/prediction scenarios above.
+
+> **Note:** `/matrix/eigenvalues` accepts an optional `options` object with `maxIterations` and `tolerance` to tune power-iteration convergence. The defaults are `1000` iterations and `1e-10` tolerance.
+
+## Testing
+Run the automated suites with Jest:
+```bash
+npm test          # unit tests (matrix + library)
+npm run test:e2e  # end-to-end HTTP contract tests
+```
+
+For a quick smoke test of the deployed REST API, execute the bundled PowerShell script (requires Windows PowerShell 5+ or pwsh on macOS/Linux):
+```bash
+pwsh ./test-api.ps1
+```
+The script calls every matrix, advanced, and ML endpoint (including the new eigenvalue and ML history routes) and prints human-readable status for each request.

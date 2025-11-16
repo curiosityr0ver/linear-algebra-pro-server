@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Matrix } from '../lib';
-import { MatrixDto, MatrixResultDto, EigenvalueResultDto } from '../dto';
+import { MatrixDto, MatrixResultDto, EigenvalueResultDto, EigenvalueOperationDto } from '../dto';
 
 @Injectable()
 export class MatrixService {
@@ -205,14 +205,20 @@ export class MatrixService {
   /**
    * Calculate dominant eigenvalue and eigenvector using power iteration
    */
-  calculateEigenvalues(matrix: MatrixDto): EigenvalueResultDto {
+  calculateEigenvalues(operation: EigenvalueOperationDto): EigenvalueResultDto {
     return this.handleMatrixOperation(() => {
-      const A = this.dtoToMatrix(matrix);
-      const { eigenvalue, eigenvector } = A.powerIteration();
+      const A = this.dtoToMatrix(operation.matrix);
+      const maxIterations = operation.options?.maxIterations ?? 1000;
+      const tolerance = operation.options?.tolerance ?? 1e-10;
+      const { eigenvalue, eigenvector, iterations, converged } = A.powerIteration(maxIterations, tolerance);
 
       return {
         eigenvalue,
-        eigenvector: this.matrixToDto(eigenvector)
+        eigenvector: this.matrixToDto(eigenvector),
+        iterations,
+        converged,
+        tolerance,
+        maxIterations
       };
     });
   }

@@ -1,128 +1,213 @@
-# Test script for Linear Algebra API endpoints
+function Test-Endpoint {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('GET', 'POST', 'DELETE', 'PUT', 'PATCH')]
+        [string]$Method,
+        [Parameter(Mandatory = $true)]
+        [string]$Uri,
+        [string]$Description = '',
+        [string]$Body
+    )
 
-Write-Host "🧪 Testing Linear Algebra API Endpoints" -ForegroundColor Cyan
+    Write-Host "`n-> $Description" -ForegroundColor DarkGray
+    try {
+        $request = @{
+            Method      = $Method
+            Uri         = $Uri
+            Headers     = @{ 'Content-Type' = 'application/json' }
+            ErrorAction = 'Stop'
+        }
+        if ($Body) {
+            $request.Body = $Body
+        }
+        $response = Invoke-WebRequest @request
+        Write-Host "[SUCCESS $($response.StatusCode)] $Description" -ForegroundColor Green
+        if ($response.Content) {
+            try {
+                return $response.Content | ConvertFrom-Json -ErrorAction Stop
+            } catch {
+                return $response.Content
+            }
+        }
+    } catch {
+        $statusCode = if ($_.Exception.Response) {
+            $_.Exception.Response.StatusCode.value__
+        } else {
+            'ERR'
+        }
+        Write-Host "[ERROR $statusCode] $Description" -ForegroundColor Red
+        if ($_.Exception.Response -and $_.Exception.Response.Content) {
+            Write-Host ($_.Exception.Response.Content | Out-String) -ForegroundColor DarkRed
+        }
+    }
+}
+
+Write-Host "Testing Linear Algebra API Endpoints" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 
-$baseUrl = "http://localhost:3000"
+function Get-ConfiguredPort {
+    $envFile = Join-Path $PSScriptRoot '.env'
+    $candidate = $null
+
+    if (Test-Path $envFile) {
+        $line = Get-Content $envFile | Where-Object { $_ -match '^\s*PORT\s*=' } | Select-Object -First 1
+        if ($line) {
+            $value = $line -replace '^\s*PORT\s*=\s*', ''
+            $value = $value.Trim()
+            if ($value.StartsWith('"') -and $value.EndsWith('"')) {
+                $value = $value.Substring(1, $value.Length - 2)
+            } elseif ($value.StartsWith("'") -and $value.EndsWith("'")) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+            $candidate = $value
+        }
+    }
+
+    if (-not $candidate -and $env:PORT) {
+        $candidate = $env:PORT
+    }
+
+    if ([string]::IsNullOrWhiteSpace($candidate)) {
+        return 3000
+    }
+
+    try {
+        return [int]$candidate
+    } catch {
+        return 3000
+    }
+}
+
+$port = Get-ConfiguredPort
+$baseUrl = "http://localhost:$port"
+Write-Host "Target API base URL: $baseUrl" -ForegroundColor Yellow
+
+function New-ApiUri {
+    param([string]$Path)
+    return "$baseUrl$Path"
+}
 
 # Test Matrix Operations
-Write-Host "`n📐 MATRIX OPERATIONS" -ForegroundColor Magenta
+Write-Host "`nMATRIX OPERATIONS" -ForegroundColor Magenta
 Write-Host "===================" -ForegroundColor Magenta
 
-# Identity matrix
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/create/identity/3" -Description "Create 3x3 identity matrix"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/create/identity/3') -Description "Create 3x3 identity matrix"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/create/zeros?rows=2&cols=3') -Description "Create 2x3 zeros matrix"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/create/ones?rows=2&cols=2') -Description "Create 2x2 ones matrix"
 
-# Zeros matrix
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/create/zeros?rows=2&cols=3" -Description "Create 2x3 zeros matrix"
-
-# Ones matrix
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/create/ones?rows=2&cols=2" -Description "Create 2x2 ones matrix"
-
-# Matrix addition
-$addBody = @{
+$binaryBody = @{
     matrixA = @{ data = @(@(1, 2), @(3, 4)) }
     matrixB = @{ data = @(@(5, 6), @(7, 8)) }
 } | ConvertTo-Json -Depth 10
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/add" -Body $addBody -Description "Matrix addition"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/add') -Body $binaryBody -Description "Matrix addition"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/subtract') -Body $binaryBody -Description "Matrix subtraction"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/multiply') -Body $binaryBody -Description "Matrix multiplication"
 
-# Matrix transpose
+$scalarBody = @{
+    matrixA = @{ data = @(@(1, 2), @(3, 4)) }
+    scalar = 2
+} | ConvertTo-Json -Depth 10
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/multiply-scalar') -Body $scalarBody -Description "Matrix x scalar"
+$divideScalarBody = @{
+    matrixA = @{ data = @(@(2, 4), @(6, 8)) }
+    scalar = 2
+} | ConvertTo-Json -Depth 10
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/divide-scalar') -Body $divideScalarBody -Description "Matrix / scalar"
+
 $transposeBody = @{
     matrix = @{ data = @(@(1, 2, 3), @(4, 5, 6)) }
 } | ConvertTo-Json -Depth 10
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/transpose" -Body $transposeBody -Description "Matrix transpose"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/transpose') -Body $transposeBody -Description "Matrix transpose"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/info') -Body $transposeBody -Description "Matrix information"
 
-# Matrix trace
-$traceBody = @{
-    matrix = @{ data = @(@(1, 2), @(3, 4)) }
+$squareMatrix = @{
+    matrix = @{ data = @(@(4, 1), @(1, 2)) }
 } | ConvertTo-Json -Depth 10
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/trace" -Body $traceBody -Description "Matrix trace"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/trace') -Body $squareMatrix -Description "Matrix trace"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/determinant') -Body $squareMatrix -Description "Matrix determinant"
 
-# Matrix determinant
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/determinant" -Body $traceBody -Description "Matrix determinant"
+$eigenBody = @{
+    matrix = @{ data = @(@(4, 1), @(1, 2)) }
+    options = @{
+        maxIterations = 250
+        tolerance = 1e-8
+    }
+} | ConvertTo-Json -Depth 10
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/eigenvalues') -Body $eigenBody -Description "Matrix eigenvalue/vector"
 
-# Matrix eigenvalues
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/eigenvalues" -Body $traceBody -Description "Matrix eigenvalues"
-
-# Matrix info
-Test-Endpoint -Method POST -Uri "$baseUrl/matrix/info" -Body $transposeBody -Description "Matrix information"
+$equalsBody = @{
+    matrixA = @{ data = @(@(1, 2), @(3, 4)) }
+    matrixB = @{ data = @(@(1, 2), @(3, 4)) }
+} | ConvertTo-Json -Depth 10
+Test-Endpoint -Method POST -Uri (New-ApiUri '/matrix/equals?tolerance=1e-9') -Body $equalsBody -Description "Matrix equality check"
 
 # Test Advanced Algorithms
-Write-Host "`n🧮 ADVANCED ALGORITHMS" -ForegroundColor Magenta
+Write-Host "`nADVANCED ALGORITHMS" -ForegroundColor Magenta
 Write-Host "=====================" -ForegroundColor Magenta
 
-# PCA
 $pcaBody = @{
     X = @{ data = @(
         @(1, 2), @(2, 4), @(3, 6), @(4, 8), @(5, 10)
     ) }
     nComponents = 1
 } | ConvertTo-Json -Depth 10
-Test-Endpoint -Method POST -Uri "$baseUrl/advanced/pca/train" -Body $pcaBody -Description "PCA training"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/advanced/pca/train') -Body $pcaBody -Description "PCA training"
 
-# SVD
 $svdBody = @{
     matrix = @{ data = @(@(4, 0, 2), @(0, 3, -1), @(2, -1, 1)) }
 } | ConvertTo-Json -Depth 10
-Test-Endpoint -Method POST -Uri "$baseUrl/advanced/svd/decompose" -Body $svdBody -Description "SVD decomposition"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/advanced/svd/decompose') -Body $svdBody -Description "SVD decomposition"
 
-# QR
 $qrBody = @{
     matrix = @{ data = @(@(1, 1), @(1, 0)) }
 } | ConvertTo-Json -Depth 10
-Test-Endpoint -Method POST -Uri "$baseUrl/advanced/qr/decompose" -Body $qrBody -Description "QR decomposition"
+Test-Endpoint -Method POST -Uri (New-ApiUri '/advanced/qr/decompose') -Body $qrBody -Description "QR decomposition"
 
 # Test Machine Learning
-Write-Host "`n🤖 MACHINE LEARNING" -ForegroundColor Magenta
+Write-Host "`nMACHINE LEARNING" -ForegroundColor Magenta
 Write-Host "==================" -ForegroundColor Magenta
 
-# Train linear regression
 $trainBody = @{
     X = @{ data = @(@(1), @(2), @(3), @(4)) }
     y = @{ data = @(@(3), @(5), @(7), @(9)) }
     options = @{
-        learningRate = 0.01
-        maxIterations = 100
+        learningRate = 0.05
+        maxIterations = 200
+        tolerance = 1e-6
         method = "adam"
     }
+    lossFunction = "mse"
 } | ConvertTo-Json -Depth 10
-$trainResponse = Test-Endpoint -Method POST -Uri "$baseUrl/ml/linear-regression/train" -Body $trainBody -Description "Train linear regression"
+$trainResult = Test-Endpoint -Method POST -Uri (New-ApiUri '/ml/linear-regression/train') -Body $trainBody -Description "Train linear regression"
+$modelId = $trainResult?.modelId
 
-# Extract model ID from response if training was successful
-if ($trainResponse) {
-    try {
-        $trainResult = Invoke-WebRequest -Uri "$baseUrl/ml/linear-regression/train" -Method POST -Headers $headers -Body $trainBody
-        $content = $trainResult.Content | ConvertFrom-Json
-        $modelId = $content.modelId
+if ($modelId) {
+    Write-Host "`nUsing Model ID: $modelId" -ForegroundColor Cyan
 
-        if ($modelId) {
-            Write-Host "`n📋 Using Model ID: $modelId" -ForegroundColor Cyan
+    $predictBody = @{
+        X = @{ data = @(@(1.5), @(2.5)) }
+    } | ConvertTo-Json -Depth 10
+    Test-Endpoint -Method POST -Uri (New-ApiUri "/ml/linear-regression/$modelId/predict") -Body $predictBody -Description "Make predictions"
 
-            # Test predictions
-            $predictBody = @{
-                X = @{ data = @(@(1.5), @(2.5)) }
-            } | ConvertTo-Json -Depth 10
-            Test-Endpoint -Method POST -Uri "$baseUrl/ml/linear-regression/$modelId/predict" -Body $predictBody -Description "Make predictions"
-
-            # Get model info
-            Test-Endpoint -Method GET -Uri "$baseUrl/ml/models/$modelId" -Description "Get model information"
-        }
-    } catch {
-        Write-Host "⚠️ Could not extract model ID for prediction testing" -ForegroundColor Yellow
-    }
+    Test-Endpoint -Method GET -Uri (New-ApiUri "/ml/models/$modelId") -Description "Get model information"
+    Test-Endpoint -Method GET -Uri (New-ApiUri "/ml/models/$modelId/history") -Description "Get model training history"
 }
 
-# List models
-Test-Endpoint -Method GET -Uri "$baseUrl/ml/models" -Description "List trained models"
+Test-Endpoint -Method GET -Uri (New-ApiUri '/ml/models') -Description "List trained models"
+
+if ($modelId) {
+    Test-Endpoint -Method DELETE -Uri (New-ApiUri "/ml/models/$modelId") -Description "Delete trained model"
+}
 
 # Test API documentation endpoint
-Write-Host "`n📚 API DOCUMENTATION" -ForegroundColor Magenta
+Write-Host "`nAPI DOCUMENTATION" -ForegroundColor Magenta
 Write-Host "===================" -ForegroundColor Magenta
 
 try {
-    $apiResponse = Invoke-WebRequest -Uri "$baseUrl/api" -Method GET
-    Write-Host "✅ API Documentation: Available at http://localhost:3000/api" -ForegroundColor Green
+    Invoke-WebRequest -Uri (New-ApiUri '/api') -Method GET | Out-Null
+    Write-Host "API Documentation: Available at http://localhost:3000/api" -ForegroundColor Green
 } catch {
-    Write-Host "❌ API Documentation: Not accessible" -ForegroundColor Red
+    Write-Host "API Documentation: Not accessible" -ForegroundColor Red
 }
 
-Write-Host "`n🎉 API Testing Complete!" -ForegroundColor Cyan
+Write-Host "`nAPI Testing Complete!" -ForegroundColor Cyan

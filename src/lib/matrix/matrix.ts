@@ -433,7 +433,7 @@ export class Matrix {
   powerIteration(
     maxIterations: number = 1000,
     tolerance: number = 1e-10,
-  ): { eigenvalue: number; eigenvector: Matrix } {
+  ): { eigenvalue: number; eigenvector: Matrix; iterations: number; converged: boolean } {
     if (!this.isSquare) {
       throw new Error(
         `Power iteration is only defined for square matrices. Matrix shape: [${this._rows}, ${this._cols}]`,
@@ -451,6 +451,8 @@ export class Matrix {
 
     let eigenvalue = 0;
     let prevEigenvalue = 0;
+    let iterations = 0;
+    let converged = false;
 
     for (let iter = 0; iter < maxIterations; iter++) {
       // Multiply matrix by current vector
@@ -470,15 +472,18 @@ export class Matrix {
         v.set(i, 0, vNew.get(i, 0) / norm);
       }
 
+      iterations = iter + 1;
+
       // Check convergence
       if (Math.abs(eigenvalue - prevEigenvalue) < tolerance) {
+        converged = true;
         break;
       }
 
       prevEigenvalue = eigenvalue;
     }
 
-    return { eigenvalue, eigenvector: v };
+    return { eigenvalue, eigenvector: v.clone(), iterations, converged };
   }
 
   /**
