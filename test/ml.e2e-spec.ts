@@ -87,7 +87,7 @@ describe('MLController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post(`/ml/linear-regression/${modelId}/predict`)
       .send(payload)
-      .expect(201);
+      .expect(200);
 
     expect(response.body.predictions.data.length).toBe(2);
     expect(response.body.predictions.cols).toBe(1);

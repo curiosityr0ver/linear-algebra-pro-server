@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -32,9 +34,10 @@ export class MatrixController {
   constructor(private readonly matrixService: MatrixService) {}
 
   @Post('create/identity/:size')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Create identity matrix' })
   @ApiParam({ name: 'size', description: 'Size of the square identity matrix', example: 3 })
-  @ApiResponse({ status: 201, description: 'Identity matrix created', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Identity matrix created', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure size is a positive integer.'
   })
@@ -43,10 +46,11 @@ export class MatrixController {
   }
 
   @Post('create/zeros')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Create zeros matrix' })
   @ApiQuery({ name: 'rows', description: 'Number of rows', example: 2 })
   @ApiQuery({ name: 'cols', description: 'Number of columns', example: 3 })
-  @ApiResponse({ status: 201, description: 'Zeros matrix created', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Zeros matrix created', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure rows and cols are positive integers.'
   })
@@ -58,10 +62,11 @@ export class MatrixController {
   }
 
   @Post('create/ones')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Create ones matrix' })
   @ApiQuery({ name: 'rows', description: 'Number of rows', example: 2 })
   @ApiQuery({ name: 'cols', description: 'Number of columns', example: 3 })
-  @ApiResponse({ status: 201, description: 'Ones matrix created', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Ones matrix created', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure rows and cols are positive integers.'
   })
@@ -73,8 +78,9 @@ export class MatrixController {
   }
 
   @Post('add')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Add two matrices' })
-  @ApiResponse({ status: 201, description: 'Matrices added', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Matrices added', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Matrices must have matching shapes and matrixB is required.'
   })
@@ -86,8 +92,9 @@ export class MatrixController {
   }
 
   @Post('subtract')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Subtract two matrices' })
-  @ApiResponse({ status: 201, description: 'Matrices subtracted', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Matrices subtracted', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Matrices must have matching shapes and matrixB is required.'
   })
@@ -99,8 +106,9 @@ export class MatrixController {
   }
 
   @Post('multiply')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Multiply two matrices' })
-  @ApiResponse({ status: 201, description: 'Matrices multiplied', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Matrices multiplied', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'matrixB is required and inner dimensions must align for multiplication.'
   })
@@ -112,8 +120,9 @@ export class MatrixController {
   }
 
   @Post('multiply-scalar')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Multiply matrix by scalar' })
-  @ApiResponse({ status: 201, description: 'Matrix multiplied by scalar', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Matrix multiplied by scalar', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Scalar value is required and must be numeric.'
   })
@@ -125,8 +134,9 @@ export class MatrixController {
   }
 
   @Post('divide-scalar')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Divide matrix by scalar' })
-  @ApiResponse({ status: 201, description: 'Matrix divided by scalar', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Matrix divided by scalar', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Scalar value is required, must be numeric, and cannot be zero.'
   })
@@ -138,8 +148,9 @@ export class MatrixController {
   }
 
   @Post('transpose')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Transpose matrix' })
-  @ApiResponse({ status: 201, description: 'Matrix transposed', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Matrix transposed', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure matrix payload is valid.'
   })
@@ -148,8 +159,9 @@ export class MatrixController {
   }
 
   @Post('trace')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Calculate matrix trace' })
-  @ApiResponse({ status: 201, description: 'Matrix trace calculated' })
+  @ApiResponse({ status: 200, description: 'Matrix trace calculated' })
   @ApiBadRequestResponse({
     description: 'Trace is only defined for square matrices.'
   })
@@ -158,8 +170,9 @@ export class MatrixController {
   }
 
   @Post('determinant')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Calculate matrix determinant' })
-  @ApiResponse({ status: 201, description: 'Matrix determinant calculated' })
+  @ApiResponse({ status: 200, description: 'Matrix determinant calculated' })
   @ApiBadRequestResponse({
     description: 'Determinant is only defined for square matrices.'
   })
@@ -168,9 +181,10 @@ export class MatrixController {
   }
 
   @Post('eigenvalues')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Calculate dominant eigenvalue and eigenvector' })
   @ApiBody({ type: EigenvalueOperationDto })
-  @ApiResponse({ status: 201, description: 'Eigenvalues calculated', type: EigenvalueResultDto })
+  @ApiResponse({ status: 200, description: 'Eigenvalues calculated', type: EigenvalueResultDto })
   @ApiBadRequestResponse({
     description: 'Ensure the matrix is square and numerically stable for power iteration.'
   })
@@ -179,8 +193,9 @@ export class MatrixController {
   }
 
   @Post('info')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get matrix information and properties' })
-  @ApiResponse({ status: 201, description: 'Matrix information retrieved' })
+  @ApiResponse({ status: 200, description: 'Matrix information retrieved' })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure matrix payload is valid.'
   })
@@ -198,8 +213,9 @@ export class MatrixController {
   }
 
   @Post('clone')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Clone matrix' })
-  @ApiResponse({ status: 201, description: 'Matrix cloned', type: MatrixResultDto })
+  @ApiResponse({ status: 200, description: 'Matrix cloned', type: MatrixResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure matrix payload is valid.'
   })
@@ -208,9 +224,10 @@ export class MatrixController {
   }
 
   @Post('equals')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Check if two matrices are equal' })
   @ApiQuery({ name: 'tolerance', description: 'Tolerance for floating point comparison', example: 1e-10, required: false })
-  @ApiResponse({ status: 201, description: 'Matrix equality checked' })
+  @ApiResponse({ status: 200, description: 'Matrix equality checked' })
   @ApiBadRequestResponse({
     description: 'Validation failed. Provide both matrices for comparison.'
   })

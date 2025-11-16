@@ -37,7 +37,7 @@ describe('MatrixController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/matrix/add')
         .send(payload)
-        .expect(201);
+        .expect(200);
 
       expect(response.body.metadata.operation).toBe('add');
       expect(response.body.result.data).toEqual([
@@ -113,7 +113,7 @@ describe('MatrixController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/matrix/trace')
         .send(payload)
-        .expect(201);
+        .expect(200);
 
       expect(response.body.trace).toBe(12); // 2 + 3 + 7
       expect(response.body.matrix.shape).toEqual([3, 3]);
@@ -138,7 +138,7 @@ describe('MatrixController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/matrix/eigenvalues')
         .send(payload)
-        .expect(201);
+        .expect(200);
 
       expect(response.body.eigenvalue).toBeCloseTo(4.4142, 3);
       expect(response.body.iterations).toBeGreaterThan(0);

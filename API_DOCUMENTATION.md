@@ -201,6 +201,38 @@ POST /matrix/determinant
 POST /matrix/eigenvalues
 ```
 
+You can pass optional `options` to tune the power-iteration solver.
+
+**Request Body:**
+```json
+{
+  "matrix": {
+    "data": [[4, 1], [1, 2]]
+  },
+  "options": {
+    "maxIterations": 500,
+    "tolerance": 1e-8
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "eigenvalue": 4.4142135624,
+  "eigenvector": {
+    "data": [[0.923], [0.383]],
+    "rows": 2,
+    "cols": 1,
+    "shape": [2, 1]
+  },
+  "iterations": 28,
+  "converged": true,
+  "tolerance": 1e-08,
+  "maxIterations": 500
+}
+```
+
 ### 1.4 Matrix Information
 
 #### Get Matrix Properties
@@ -501,19 +533,53 @@ curl -X POST "http://localhost:3001/ml/linear-regression/linear_regression_17031
 }
 ```
 
-#### Manage Models
-
-**List Models:**
+#### List Models
 ```http
 GET /ml/models
 ```
 
-**Get Model Info:**
+**Example response:**
+```json
+[
+  {
+    "modelId": "linear_regression_1731442192000_abcd12345",
+    "type": "linear_regression",
+    "created": "2025-11-09T10:30:15.123Z",
+    "optimizer": "adam",
+    "lossFunction": "mse",
+    "iterations": 120,
+    "final_loss": 0.0043,
+    "converged": true
+  }
+]
+```
+
+#### Get Model Info
 ```http
 GET /ml/models/{modelId}
 ```
 
-**Delete Model:**
+Returns the stored weights/bias and the training metadata (iterations, convergence flag, optimizer, loss function, and the full loss curve).
+
+#### Get Training History
+```http
+GET /ml/models/{modelId}/history
+```
+
+Useful for plotting the loss curve without downloading the entire model. Response example:
+```json
+{
+  "modelId": "linear_regression_1731442192000_abcd12345",
+  "loss_history": [58.1, 4.9, 0.23, 0.01],
+  "iterations": 120,
+  "converged": true,
+  "final_loss": 0.01,
+  "lossFunction": "mse",
+  "optimizer": "adam"
+}
+```
+
+#### Delete Model
 ```http
 DELETE /ml/models/{modelId}
 ```

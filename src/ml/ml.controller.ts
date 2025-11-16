@@ -1,13 +1,14 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Delete,
   Body,
-  Param,
-  ValidationPipe,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
   HttpException,
-  HttpStatus
+  HttpStatus,
+  Param,
+  Post,
+  ValidationPipe
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -62,9 +63,10 @@ export class MLController {
   }
 
   @Post('linear-regression/:modelId/predict')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Make predictions with trained linear regression model' })
   @ApiParam({ name: 'modelId', description: 'ID of the trained model', example: 'linear_regression_1234567890_abc123def' })
-  @ApiResponse({ status: 201, description: 'Predictions made successfully', type: LinearRegressionPredictResultDto })
+  @ApiResponse({ status: 200, description: 'Predictions made successfully', type: LinearRegressionPredictResultDto })
   @ApiBadRequestResponse({
     description: 'Prediction failed. Ensure input matrix matches the model shape.'
   })

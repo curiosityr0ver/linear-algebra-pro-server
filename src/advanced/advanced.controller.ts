@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, ValidationPipe } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdvancedService } from './advanced.service';
 import {
@@ -21,8 +21,9 @@ export class AdvancedController {
   constructor(private readonly advancedService: AdvancedService) {}
 
   @Post('pca/train')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Train PCA model and transform data' })
-  @ApiResponse({ status: 201, description: 'PCA training completed', type: PCAResultDto })
+  @ApiResponse({ status: 200, description: 'PCA training completed', type: PCAResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure matrices have compatible dimensions and options.'
   })
@@ -31,8 +32,9 @@ export class AdvancedController {
   }
 
   @Post('pca/transform')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Transform data using trained PCA model' })
-  @ApiResponse({ status: 201, description: 'Data transformed with PCA' })
+  @ApiResponse({ status: 200, description: 'Data transformed with PCA' })
   @ApiBadRequestResponse({
     description: 'Validation failed. Provide both the dataset and trained PCA metadata.'
   })
@@ -43,8 +45,9 @@ export class AdvancedController {
   }
 
   @Post('svd/decompose')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Perform Singular Value Decomposition' })
-  @ApiResponse({ status: 201, description: 'SVD decomposition completed', type: SVDResultDto })
+  @ApiResponse({ status: 200, description: 'SVD decomposition completed', type: SVDResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed or matrix cannot be decomposed.'
   })
@@ -53,8 +56,9 @@ export class AdvancedController {
   }
 
   @Post('svd/reconstruct')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Perform low-rank SVD reconstruction' })
-  @ApiResponse({ status: 201, description: 'SVD reconstruction completed', type: SVDReconstructResultDto })
+  @ApiResponse({ status: 200, description: 'SVD reconstruction completed', type: SVDReconstructResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed. Ensure requested rank is valid.'
   })
@@ -63,8 +67,9 @@ export class AdvancedController {
   }
 
   @Post('qr/decompose')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Perform QR decomposition' })
-  @ApiResponse({ status: 201, description: 'QR decomposition completed', type: QRResultDto })
+  @ApiResponse({ status: 200, description: 'QR decomposition completed', type: QRResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed or matrix cannot be decomposed.'
   })
@@ -73,8 +78,9 @@ export class AdvancedController {
   }
 
   @Post('qr/solve')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Solve linear system using QR decomposition' })
-  @ApiResponse({ status: 201, description: 'Linear system solved', type: QRSolveResultDto })
+  @ApiResponse({ status: 200, description: 'Linear system solved', type: QRSolveResultDto })
   @ApiBadRequestResponse({
     description: 'Validation failed or system cannot be solved.'
   })
