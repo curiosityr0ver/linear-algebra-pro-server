@@ -112,6 +112,16 @@ export class PCA {
   }
 
   /**
+   * Get the column-wise mean computed during fitting
+   */
+  getMean(): Matrix {
+    if (!this.mean) {
+      throw new Error('PCA must be fitted first');
+    }
+    return this.mean.clone();
+  }
+
+  /**
    * Get explained variance for each component
    */
   getExplainedVariance(): number[] {

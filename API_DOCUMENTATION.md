@@ -320,6 +320,12 @@ curl -X POST "http://localhost:3001/advanced/pca/train" \
     "cols": 2,
     "shape": [1, 2]
   },
+  "mean": {
+    "data": [[3, 6]],
+    "rows": 1,
+    "cols": 2,
+    "shape": [1, 2]
+  },
   "explained_variance": [8.0],
   "explained_variance_ratio": [1.0],
   "n_components": 1
@@ -329,6 +335,50 @@ curl -X POST "http://localhost:3001/advanced/pca/train" \
 #### Transform with PCA
 ```http
 POST /advanced/pca/transform
+```
+
+**Request Body:**
+```json
+{
+  "X": {
+    "data": [[1.5, 2.6], [3.3, 6.4], [5.2, 10.1]]
+  },
+  "trainedPCA": {
+    "X_transformed": {
+      "data": [[-2.027], [1.573], [0.0], [-1.573], [2.027]],
+      "rows": 5,
+      "cols": 1,
+      "shape": [5, 1]
+    },
+    "components": {
+      "data": [[0.447, 0.894]],
+      "rows": 1,
+      "cols": 2,
+      "shape": [1, 2]
+    },
+    "mean": {
+      "data": [[3, 6]],
+      "rows": 1,
+      "cols": 2,
+      "shape": [1, 2]
+    },
+    "explained_variance": [8.0],
+    "explained_variance_ratio": [1.0],
+    "n_components": 1
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "X_transformed": {
+    "data": [[-3.2], [0.1], [3.3]],
+    "rows": 3,
+    "cols": 1,
+    "shape": [3, 1]
+  }
+}
 ```
 
 ### 2.2 Singular Value Decomposition (SVD)

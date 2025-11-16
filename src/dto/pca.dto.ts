@@ -37,6 +37,12 @@ export class PCAResultDto {
   components: MatrixDto;
 
   @ApiProperty({
+    description: 'Column-wise mean that was subtracted during training',
+    type: MatrixDto
+  })
+  mean: MatrixDto;
+
+  @ApiProperty({
     description: 'Explained variance for each component',
     example: [2.5, 1.2, 0.3]
   })

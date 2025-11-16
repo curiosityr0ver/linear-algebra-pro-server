@@ -31,11 +31,16 @@ describe('Advanced Linear Algebra Algorithms', () => {
       pca.fit(X, 1);
 
       const components = pca.getComponents();
+      const mean = pca.getMean();
       const explainedVariance = pca.getExplainedVariance();
       const explainedVarianceRatio = pca.getExplainedVarianceRatio();
 
       expect(components.rows).toBe(1);
       expect(components.cols).toBe(2);
+      expect(mean.rows).toBe(1);
+      expect(mean.cols).toBe(2);
+      expect(mean.get(0, 0)).toBeCloseTo(3.05, 2);
+      expect(mean.get(0, 1)).toBeCloseTo(4.05, 2);
       expect(explainedVariance.length).toBe(1);
       expect(explainedVarianceRatio.length).toBe(1);
       expect(explainedVarianceRatio[0]).toBeGreaterThan(0.9); // Should explain most variance

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PCA, SVD, QR } from '../lib';
 import {
   PCATrainDto,
@@ -55,6 +55,7 @@ export class AdvancedService {
     return {
       X_transformed: this.matrixToDto(X_transformed),
       components: this.matrixToDto(pca.getComponents()),
+      mean: this.matrixToDto(pca.getMean()),
       explained_variance: pca.getExplainedVariance(),
       explained_variance_ratio: pca.getExplainedVarianceRatio(),
       n_components: trainingData.nComponents || pca.getComponents().cols
@@ -65,13 +66,35 @@ export class AdvancedService {
    * Transform data using trained PCA
    */
   transformWithPCA(transformData: PCATransformDto, trainedPCA: PCAResultDto): { X_transformed: any } {
-    // For simplicity, we'll retrain PCA. In a real application, you'd store the trained model.
-    const X_train = this.arrayToMatrix(trainedPCA.X_transformed.data.map(row => row.slice(0, trainedPCA.components.cols)));
-    const pca = new PCA();
-    pca.fit(X_train, trainedPCA.n_components);
+    if (!trainedPCA.mean) {
+      throw new BadRequestException(
+        'trainedPCA.mean is missing. Retrain the PCA model after upgrading the server to include mean metadata.'
+      );
+    }
 
+    const meanMatrix = this.arrayToMatrix(trainedPCA.mean.data);
+    const componentsMatrix = this.arrayToMatrix(trainedPCA.components.data);
     const X_test = this.arrayToMatrix(transformData.X.data);
-    const X_transformed = pca.transform(X_test);
+
+    if (meanMatrix.rows !== 1) {
+      throw new BadRequestException('trainedPCA.mean must be a single-row matrix');
+    }
+
+    if (X_test.cols !== meanMatrix.cols) {
+      throw new BadRequestException(`Input data has ${X_test.cols} features, expected ${meanMatrix.cols}`);
+    }
+
+    const centeredData: number[][] = [];
+    for (let i = 0; i < X_test.rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < X_test.cols; j++) {
+        row.push(X_test.get(i, j) - meanMatrix.get(0, j));
+      }
+      centeredData.push(row);
+    }
+
+    const X_centered = this.arrayToMatrix(centeredData);
+    const X_transformed = X_centered.multiply(componentsMatrix.transpose());
 
     return {
       X_transformed: this.matrixToDto(X_transformed)
